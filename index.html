@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>إدارة مزرعة النخيل</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a0a;--card:#161616;--border:#2a2a2a;--text:#f5f5f5;--muted:#888;--green:#4ade80;--red:#f87171;--yellow:#fbbf24;--blue:#60a5fa;--orange:#fb923c;--purple:#a78bfa;--teal:#2dd4bf;--pink:#f472b6}
+html,body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
+#app{max-width:600px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:#111;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800}
+.tabs{display:flex;overflow-x:auto;background:#111;border-bottom:1px solid var(--border);scrollbar-width:none;position:sticky;top:49px;z-index:99}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;padding:10px 6px;font-size:13px;font-family:'Tajawal',sans-serif;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;text-align:center}
+.tab.active{color:#fff;border-bottom-color:#fff;font-weight:700}
+.content{flex:1;padding:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.lbl{color:var(--muted);font-size:13px}
+.val{font-size:14px;font-weight:600}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.bg-green{background:#14532d;color:var(--green)}
+.bg-blue{background:#0c1a2e;color:var(--blue)}
+.bg-yellow{background:#451a03;color:var(--yellow)}
+.bg-red{background:#450a0a;color:var(--red)}
+.bg-purple{background:#2e1065;color:var(--purple)}
+.bg-orange{background:#431407;color:var(--orange)}
+.bg-gray{background:#1f2937;color:var(--muted)}
+.bg-teal{background:#042f2e;color:var(--teal)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:8px;border:none;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px}
+.btn-green{background:#166534;color:#fff}
+.btn-red{background:#7f1d1d;color:#fff}
+.btn-gray{background:#374151;color:#fff}
+.btn-blue{background:#1e3a5f;color:#fff}
+.btn-teal{background:#115e59;color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px;width:auto;margin-bottom:0}
+.btn-xs{padding:3px 8px;font-size:11px;width:auto;margin-bottom:0;border-radius:6px}
+input,select,textarea{background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:15px;padding:10px 12px;width:100%;outline:none;margin-bottom:10px}
+input:focus,select:focus,textarea:focus{border-color:#555}
+textarea{resize:vertical;min-height:60px}
+.field-lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:#0f0f0f;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.stat-box .num{font-size:22px;font-weight:800}
+.stat-box .lbl2{font-size:11px;color:var(--muted);margin-top:3px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:18px 18px 0 0;width:100%;max-width:600px;padding:20px;max-height:92vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.close-btn{background:none;border:none;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
+.empty{text-align:center;color:var(--muted);padding:40px;font-size:15px;white-space:pre-line}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.search-bar{background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;padding:9px 12px;width:100%;outline:none;margin-bottom:12px}
+.basin-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.basin-header{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#1a1a1a}
+.basin-body{padding:12px 14px;border-top:1px solid var(--border)}
+.log-item{background:#0f0f0f;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:7px}
+.log-item:last-child{margin-bottom:0}
+select option{background:#161616}
+
+/* خريطة الأحواض */
+.map-toolbar{display:flex;gap:6px;margin-bottom:12px}
+.map-wrap{overflow-x:auto;overflow-y:auto;border:1px solid var(--border);border-radius:12px;background:#0d0d0d;padding:10px;max-height:60vh}
+.map-grid{display:grid;gap:3px;position:relative}
+.map-cell{background:#1a1a1a;border:1px dashed #333;border-radius:4px;min-width:34px;min-height:34px;cursor:pointer}
+.map-cell.selecting{background:#374151;border-color:#6b7280}
+.map-basin{border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;font-size:11px;font-weight:800;color:#fff;padding:4px;line-height:1.2;overflow:hidden;border:2px solid rgba(255,255,255,.25)}
+.legend-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyBWcomQ1ZiVh7_ag_RMLY1h3l-Z1fv7abU",
+  authDomain:"farm-5b576.firebaseapp.com",
+  projectId:"farm-5b576",
+  storageBucket:"farm-5b576.firebasestorage.app",
+  messagingSenderId:"724050437617",
+  appId:"1:724050437617:web:ed9da41109da781583d050"
+});
+var db=firebase.firestore();
+
+// ─── STATE ───
+var S={
+  tab:"map",modal:null,
+  basins:{},irrigLogs:{},prodLogs:{},
+  expanded:{},
+  gridRows:6,gridCols:8,
+  reportMonth:"all",
+  mapSelecting:null // {startRow,startCol} عند اختيار حوض جديد
+};
+
+var BASIN_COLORS=["#166534","#1e3a5f","#7c3aed","#b45309","#0f766e","#9d174d","#4338ca","#a16207","#15803d","#be123c"];
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,4);}
+function fd(s){if(!s)return"—";var d=new Date(s);return isNaN(d)?"—":d.toLocaleDateString("en-GB");}
+function today(){return new Date().toISOString().split("T")[0];}
+var MONTH_NAMES=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+function dateToMonthKey(dateStr){
+  var d=new Date(dateStr);
+  if(isNaN(d))return null;
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+function monthKeyLabel(key){
+  var parts=key.split("-");
+  var y=parts[0],mo=parseInt(parts[1]);
+  return MONTH_NAMES[mo-1]+" "+y;
+}
+
+// ─── FIRESTORE ───
+async function loadData(){
+  try{
+    var bs=await db.collection("palm_basins").get();
+    bs.forEach(d=>{S.basins[d.id]=d.data();});
+    var ir=await db.collection("palm_irrigation").get();
+    ir.forEach(d=>{S.irrigLogs[d.id]=d.data();});
+    var pr=await db.collection("palm_production").get();
+    pr.forEach(d=>{S.prodLogs[d.id]=d.data();});
+    var cfg=await db.collection("palm_config").doc("grid").get();
+    if(cfg.exists){
+      var c=cfg.data();
+      if(c.gridRows)S.gridRows=c.gridRows;
+      if(c.gridCols)S.gridCols=c.gridCols;
+    }
+  }catch(e){console.warn(e);}
+  render();
+}
+
+async function saveBasin(b){S.basins[b.id]=b;try{await db.collection("palm_basins").doc(b.id).set(b);}catch(e){}render();}
+async function deleteBasin(id){
+  delete S.basins[id];
+  try{await db.collection("palm_basins").doc(id).delete();}catch(e){}
+  var toDelI=Object.keys(S.irrigLogs).filter(k=>S.irrigLogs[k].basinId===id);
+  for(var k of toDelI){delete S.irrigLogs[k];try{await db.collection("palm_irrigation").doc(k).delete();}catch(e){}}
+  var toDelP=Object.keys(S.prodLogs).filter(k=>S.prodLogs[k].basinId===id);
+  for(var k2 of toDelP){delete S.prodLogs[k2];try{await db.collection("palm_production").doc(k2).delete();}catch(e){}}
+  render();
+}
+async function saveIrrigLog(l){S.irrigLogs[l.id]=l;try{await db.collection("palm_irrigation").doc(l.id).set(l);}catch(e){}render();}
+async function deleteIrrigLog(id){delete S.irrigLogs[id];try{await db.collection("palm_irrigation").doc(id).delete();}catch(e){}render();}
+async function saveProdLog(l){S.prodLogs[l.id]=l;try{await db.collection("palm_production").doc(l.id).set(l);}catch(e){}render();}
+async function deleteProdLog(id){delete S.prodLogs[id];try{await db.collection("palm_production").doc(id).delete();}catch(e){}render();}
+async function saveGridConfig(){
+  try{await db.collection("palm_config").doc("grid").set({gridRows:S.gridRows,gridCols:S.gridCols});}catch(e){}
+}
+
+// ─── RENDER HELPERS ───
+function h(tag,props){
+  var el=document.createElement(tag);
+  if(props)Object.entries(props).forEach(([k,v])=>{
+    if(k==="cls")el.className=v;
+    else if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
+    else if(k[0]==="o"&&k[1]==="n")el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==="html")el.innerHTML=v;
+    else el.setAttribute(k,v);
+  });
+  for(var i=2;i<arguments.length;i++){
+    var c=arguments[i];
+    if(c==null)continue;
+    if(Array.isArray(c)){c.forEach(x=>{if(x!=null)el.appendChild(typeof x==="string"?document.createTextNode(x):x);});}
+    else el.appendChild(typeof c==="string"||typeof c==="number"?document.createTextNode(String(c)):c);
+  }
+  return el;
+}
+function set(p){Object.assign(S,p);render();}
+
+function render(){
+  var app=document.getElementById("app");
+  app.innerHTML="";
+  app.appendChild(rTopbar());
+  app.appendChild(rTabs());
+  var c=h("div",{cls:"content"});
+  c.appendChild(rPage());
+  app.appendChild(c);
+  if(S.modal)app.appendChild(rModal());
+}
+
+function rTopbar(){
+  var btns={irrigation:"+ سجل",production:"+ قطفة"};
+  var actions={
+    irrigation:()=>set({modal:{type:"addIrrig"}}),
+    production:()=>set({modal:{type:"addProd"}}),
+  };
+  return h("div",{cls:"topbar"},
+    h("div",{cls:"topbar-title"},"🌴 إدارة مزرعة النخيل"),
+    actions[S.tab]?h("button",{cls:"btn btn-green btn-sm",onClick:actions[S.tab]},btns[S.tab]):h("div",{})
+  );
+}
+
+function rTabs(){
+  var bar=h("div",{cls:"tabs"});
+  [{id:"map",l:"🗺️ الأحواض"},{id:"irrigation",l:"💧 الري والتسميد"},{id:"production",l:"🌾 الإنتاج"},{id:"report",l:"📊 التقرير"}]
+    .forEach(t=>bar.appendChild(h("button",{cls:"tab"+(S.tab===t.id?" active":""),onClick:()=>set({tab:t.id,modal:null,mapSelecting:null})},t.l)));
+  return bar;
+}
+
+function rPage(){
+  if(S.tab==="map")return rMap();
+  if(S.tab==="irrigation")return rIrrigation();
+  if(S.tab==="production")return rProduction();
+  if(S.tab==="report")return rReport();
+  return h("div",{cls:"empty"},"قريباً");
+}
+
+function basinColor(b){
+  if(b.color)return b.color;
+  var ids=Object.keys(S.basins);
+  var idx=ids.indexOf(b.id);
+  return BASIN_COLORS[(idx<0?0:idx)%BASIN_COLORS.length];
+}
+
+// ═══════════════════ خريطة الأحواض ═══════════════════
+function rMap(){
+  var w=h("div",{});
+
+  var toolbar=h("div",{cls:"map-toolbar"});
+  toolbar.appendChild(h("button",{cls:"btn btn-green btn-sm",style:{flex:"1"},onClick:()=>set({modal:{type:"addBasinPick"},mapSelecting:null})},"+ حوض جديد"));
+  toolbar.appendChild(h("button",{cls:"btn btn-gray btn-sm",style:{flex:"1"},onClick:()=>set({modal:{type:"gridSettings"}})},"⚙️ إعداد الشبكة"));
+  w.appendChild(toolbar);
+
+  var basinsList=Object.values(S.basins);
+  if(!basinsList.length){
+    w.appendChild(h("div",{cls:"empty"},"🗺️\nلا توجد أحواض بعد\nاضغط \"+ حوض جديد\" وحدد موقعه على الشبكة"));
+  }
+
+  var mapWrap=h("div",{cls:"map-wrap"});
+  var grid=h("div",{cls:"map-grid",style:{
+    gridTemplateColumns:"repeat("+S.gridCols+",36px)",
+    gridTemplateRows:"repeat("+S.gridRows+",36px)"
+  }});
+
+  // خلايا فارغة (خلفية الشبكة)
+  for(var r=0;r<S.gridRows;r++){
+    for(var c=0;c<S.gridCols;c++){
+      var cell=h("div",{cls:"map-cell",style:{gridRow:(r+1),gridColumn:(c+1)}});
+      grid.appendChild(cell);
+    }
+  }
+
+  // رسم الأحواض فوق الشبكة
+  basinsList.forEach(function(b){
+    var col=basinColor(b);
+    var basinEl=h("div",{
+      cls:"map-basin",
+      style:{
+        gridRow:(b.r1+1)+" / "+(b.r2+2),
+        gridColumn:(b.c1+1)+" / "+(b.c2+2),
+        background:col
+      },
+      onClick:()=>set({modal:{type:"basinDetail",bid:b.id}})
+    },b.name||"حوض");
+    grid.appendChild(basinEl);
+  });
+
+  mapWrap.appendChild(grid);
+  w.appendChild(mapWrap);
+
+  if(basinsList.length){
+    w.appendChild(h("div",{cls:"field-lbl",style:{marginTop:"14px"}},"الأحواض ("+basinsList.length+")"));
+    basinsList.forEach(function(b){
+      w.appendChild(h("div",{cls:"legend-row",onClick:()=>set({modal:{type:"basinDetail",bid:b.id}}),style:{cursor:"pointer"}},
+        h("span",{cls:"legend-dot",style:{background:basinColor(b)}}),
+        h("span",{},b.name+(b.variety?" — "+b.variety:""))
+      ));
+    });
+  }
+
+  return w;
+}
+
+// ═══════════════════ تفاصيل الحوض ═══════════════════
+function rBasinDetail(box,bid){
+  var b=S.basins[bid];
+  if(!b){box.appendChild(h("div",{cls:"empty"},"الحوض غير موجود"));return;}
+
+  mTitle(box,"🌴 "+b.name);
+
+  var infoCard=h("div",{cls:"card"});
+  infoCard.appendChild(h("div",{cls:"row"},h("span",{cls:"lbl"},"الصنف"),h("span",{cls:"val"},b.variety||"—")));
+  infoCard.appendChild(h("div",{cls:"row"},h("span",{cls:"lbl"},"عدد النخل التقريبي"),h("span",{cls:"val"},b.palmCount||"—")));
+  if(b.notes)infoCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"8px"}},b.notes));
+  box.appendChild(infoCard);
+
+  box.appendChild(h("div",{style:{display:"flex",gap:"6px",marginBottom:"14px"}},
+    h("button",{cls:"btn btn-gray btn-sm",onClick:()=>set({modal:{type:"editBasin",bid:bid}})},"✏️ تعديل الحوض"),
+    h("button",{cls:"btn btn-red btn-sm",onClick:async()=>{
+      if(!confirm("حذف حوض '"+b.name+"' وكل سجلاته؟"))return;
+      set({modal:null});
+      await deleteBasin(bid);
+    }},"🗑 حذف الحوض")
+  ));
+
+  // سجل الري والتسميد لهذا الحوض
+  var irrigs=Object.values(S.irrigLogs).filter(l=>l.basinId===bid).sort((a,b2)=>(b2.date||"").localeCompare(a.date||""));
+  box.appendChild(h("div",{style:{fontWeight:"800",fontSize:"14px",margin:"4px 0 8px"}},"💧 سجل الري والتسميد ("+irrigs.length+")"));
+  box.appendChild(h("button",{cls:"btn btn-teal btn-sm",style:{marginBottom:"8px"},onClick:()=>set({modal:{type:"addIrrig",basinId:bid}})},"+ إضافة سجل"));
+  if(!irrigs.length){
+    box.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",padding:"6px 0 14px"}},"لا توجد سجلات بعد"));
+  }
+  irrigs.forEach(function(l){
+    var li=h("div",{cls:"log-item"});
+    li.appendChild(h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}},
+      h("span",{cls:"badge "+(l.opType==="ري"?"bg-blue":"bg-orange")},l.opType),
+      h("span",{style:{fontSize:"12px",color:"var(--muted)"}},fd(l.date))
+    ));
+    if(l.notes)li.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)"}},l.notes));
+    li.appendChild(h("div",{style:{display:"flex",gap:"6px",marginTop:"6px"}},
+      h("button",{cls:"btn btn-gray btn-xs",onClick:()=>set({modal:{type:"editIrrig",lid:l.id}})},"✏️ تعديل"),
+      h("button",{cls:"btn btn-red btn-xs",onClick:async()=>{
+        if(!confirm("حذف هذا السجل؟"))return;
+        await deleteIrrigLog(l.id);
+        set({modal:{type:"basinDetail",bid:bid}});
+      }},"🗑 حذف")
+    ));
+    box.appendChild(li);
+  });
+
+  box.appendChild(h("div",{cls:"divider"}));
+
+  // سجل الإنتاج لهذا الحوض
+  var prods=Object.values(S.prodLogs).filter(l=>l.basinId===bid).sort((a,b2)=>(b2.date||"").localeCompare(a.date||""));
+  box.appendChild(h("div",{style:{fontWeight:"800",fontSize:"14px",margin:"4px 0 8px"}},"🌾 سجل الإنتاج ("+prods.length+")"));
+  box.appendChild(h("button",{cls:"btn btn-green btn-sm",style:{marginBottom:"8px"},onClick:()=>set({modal:{type:"addProd",basinId:bid}})},"+ إضافة قطفة"));
+  if(!prods.length){
+    box.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",padding:"6px 0"}},"لا توجد قطفات بعد"));
+  }
+  prods.forEach(function(l){
+    var li=h("div",{cls:"log-item"});
+    li.appendChild(h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}},
+      h("span",{style:{fontWeight:"700",fontSize:"13px"}},(l.quantity||"—")+" "+(l.unit||"")),
+      h("span",{style:{fontSize:"12px",color:"var(--muted)"}},fd(l.date))
+    ));
+    if(l.notes)li.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)"}},l.notes));
+    li.appendChild(h("div",{style:{display:"flex",gap:"6px",marginTop:"6px"}},
+      h("button",{cls:"btn btn-gray btn-xs",onClick:()=>set({modal:{type:"editProd",lid:l.id}})},"✏️ تعديل"),
+      h("button",{cls:"btn btn-red btn-xs",onClick:async()=>{
+        if(!confirm("حذف هذه القطفة؟"))return;
+        await deleteProdLog(l.id);
+        set({modal:{type:"basinDetail",bid:bid}});
+      }},"🗑 حذف")
+    ));
+    box.appendChild(li);
+  });
+}
+
+// ═══════════════════ الري والتسميد (تبويب) ═══════════════════
+function rIrrigation(){
+  var w=h("div",{});
+  var logs=Object.values(S.irrigLogs).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+
+  if(!logs.length){
+    w.appendChild(h("div",{cls:"empty"},"💧\nلا توجد سجلات بعد\nاضغط + سجل لإضافة عملية ري أو تسميد"));
+    return w;
+  }
+
+  var si=h("input",{cls:"search-bar",type:"text",placeholder:"🔍 بحث باسم الحوض..."});
+  w.appendChild(si);
+
+  var list=h("div",{});
+  function renderList(q){
+    list.innerHTML="";
+    var f=logs.filter(l=>{
+      var b=S.basins[l.basinId];
+      var name=b?b.name:"";
+      return !q||name.includes(q);
+    });
+    if(!f.length){list.appendChild(h("div",{cls:"empty"},"لا توجد نتائج"));return;}
+    f.forEach(l=>list.appendChild(buildIrrigCard(l)));
+  }
+  si.addEventListener("input",e=>renderList(e.target.value.trim()));
+  renderList("");
+  w.appendChild(list);
+  return w;
+}
+
+function buildIrrigCard(l){
+  var b=S.basins[l.basinId];
+  var card=h("div",{cls:"card"});
+  card.appendChild(h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}},
+    h("div",{style:{fontWeight:"800",fontSize:"14px"}},b?b.name:"(حوض محذوف)"),
+    h("span",{cls:"badge "+(l.opType==="ري"?"bg-blue":"bg-orange")},l.opType)
+  ));
+  card.appendChild(h("div",{cls:"row"},h("span",{cls:"lbl"},"التاريخ"),h("span",{cls:"val"},fd(l.date))));
+  if(l.notes)card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"6px"}},l.notes));
+  card.appendChild(h("div",{style:{display:"flex",gap:"6px",marginTop:"10px"}},
+    h("button",{cls:"btn btn-gray btn-sm",onClick:()=>set({modal:{type:"editIrrig",lid:l.id}})},"✏️ تعديل"),
+    h("button",{cls:"btn btn-red btn-sm",onClick:async()=>{
+      if(!confirm("حذف هذا السجل؟"))return;
+      await deleteIrrigLog(l.id);
+    }},"🗑 حذف")
+  ));
+  return card;
+}
+
+// ═══════════════════ الإنتاج (تبويب) ═══════════════════
+function rProduction(){
+  var w=h("div",{});
+  var logs=Object.values(S.prodLogs).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+
+  if(!logs.length){
+    w.appendChild(h("div",{cls:"empty"},"🌾\nلا توجد قطفات مسجلة بعد\nاضغط + قطفة لإضافة إنتاج"));
+    return w;
+  }
+
+  var si=h("input",{cls:"search-bar",type:"text",placeholder:"🔍 بحث باسم الحوض..."});
+  w.appendChild(si);
+
+  var list=h("div",{});
+  function renderList(q){
+    list.innerHTML="";
+    var f=logs.filter(l=>{
+      var b=S.basins[l.basinId];
+      var name=b?b.name:"";
+      return !q||name.includes(q);
+    });
+    if(!f.length){list.appendChild(h("div",{cls:"empty"},"لا توجد نتائج"));return;}
+    f.forEach(l=>list.appendChild(buildProdCard(l)));
+  }
+  si.addEventListener("input",e=>renderList(e.target.value.trim()));
+  renderList("");
+  w.appendChild(list);
+  return w;
+}
+
+function buildProdCard(l){
+  var b=S.basins[l.basinId];
+  var card=h("div",{cls:"card"});
+  card.appendChild(h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}},
+    h("div",{style:{fontWeight:"800",fontSize:"14px"}},b?b.name:"(حوض محذوف)"),
+    h("span",{cls:"badge bg-green"},(l.quantity||"—")+" "+(l.unit||""))
+  ));
+  card.appendChild(h("div",{cls:"row"},h("span",{cls:"lbl"},"تاريخ القطف"),h("span",{cls:"val"},fd(l.date))));
+  if(l.notes)card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"6px"}},l.notes));
+  card.appendChild(h("div",{style:{display:"flex",gap:"6px",marginTop:"10px"}},
+    h("button",{cls:"btn btn-gray btn-sm",onClick:()=>set({modal:{type:"editProd",lid:l.id}})},"✏️ تعديل"),
+    h("button",{cls:"btn btn-red btn-sm",onClick:async()=>{
+      if(!confirm("حذف هذه القطفة؟"))return;
+      await deleteProdLog(l.id);
+    }},"🗑 حذف")
+  ));
+  return card;
+}
+
+// ═══════════════════ التقرير ═══════════════════
+function rReport(){
+  var w=h("div",{});
+  var basins=Object.values(S.basins);
+  var allIrrig=Object.values(S.irrigLogs);
+  var allProd=Object.values(S.prodLogs);
+
+  // بناء قائمة الأشهر من تواريخ الري والإنتاج معاً
+  var monthSet={};
+  allIrrig.forEach(l=>{var k=dateToMonthKey(l.date);if(k)monthSet[k]=true;});
+  allProd.forEach(l=>{var k=dateToMonthKey(l.date);if(k)monthSet[k]=true;});
+  var curKey=dateToMonthKey(today());
+  monthSet[curKey]=true;
+  var monthKeys=Object.keys(monthSet).sort().reverse();
+  var selectedMonth=S.reportMonth||"all";
+
+  var monthBar=h("div",{style:{display:"flex",gap:"6px",marginBottom:"12px"}});
+  var fMonthSel=h("select",{style:{marginBottom:"0",flex:"1"}});
+  fMonthSel.appendChild(h("option",{value:"all"},"كل الفترة"));
+  monthKeys.forEach(function(key){
+    fMonthSel.appendChild(h("option",{value:key},monthKeyLabel(key)));
+  });
+  fMonthSel.value=selectedMonth;
+  fMonthSel.addEventListener("change",function(){set({reportMonth:fMonthSel.value});});
+  monthBar.appendChild(fMonthSel);
+  w.appendChild(monthBar);
+
+  var irrig=selectedMonth==="all"?allIrrig:allIrrig.filter(l=>dateToMonthKey(l.date)===selectedMonth);
+  var prod=selectedMonth==="all"?allProd:allProd.filter(l=>dateToMonthKey(l.date)===selectedMonth);
+
+  var irrigCount=irrig.filter(l=>l.opType==="ري").length;
+  var fertCount=irrig.filter(l=>l.opType==="تسميد").length;
+  var totalProd=prod.reduce((sum,l)=>sum+(parseFloat(l.quantity)||0),0);
+
+  var grid=h("div",{cls:"stat-grid"});
+  [
+    [String(basins.length),"إجمالي الأحواض","var(--orange)"],
+    [String(irrigCount),"عمليات ري","var(--blue)"],
+    [String(fertCount),"عمليات تسميد","var(--yellow)"],
+    [String(totalProd),"إجمالي الإنتاج","var(--green)"],
+  ].forEach(([n,l,c])=>{
+    grid.appendChild(h("div",{cls:"stat-box"},
+      h("div",{cls:"num",style:{color:c}},n),
+      h("div",{cls:"lbl2"},l)
+    ));
+  });
+  w.appendChild(grid);
+
+  // إنتاج حسب الحوض
+  if(prod.length){
+    w.appendChild(h("div",{style:{fontWeight:"800",fontSize:"14px",margin:"16px 0 10px",color:"var(--muted)"}},"🌾 الإنتاج حسب الحوض"));
+    var byBasin={};
+    prod.forEach(function(l){
+      if(!byBasin[l.basinId])byBasin[l.basinId]={qty:0,unit:l.unit||""};
+      byBasin[l.basinId].qty+=parseFloat(l.quantity)||0;
+    });
+    Object.keys(byBasin).forEach(function(bid){
+      var b=S.basins[bid];
+      var d=byBasin[bid];
+      w.appendChild(h("div",{cls:"row",style:{padding:"8px 0"}},
+        h("span",{},b?b.name:"(حوض محذوف)"),
+        h("span",{style:{fontWeight:"700"}},d.qty+" "+d.unit)
+      ));
+    });
+  }
+
+  // زر الطباعة
+  var printTitle=selectedMonth==="all"?"كل الفترة":monthKeyLabel(selectedMonth);
+  w.appendChild(h("button",{cls:"btn btn-gray",style:{marginTop:"14px"},onClick:function(){
+    var printNow=new Date();
+    var irrigRows=irrig.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(function(l){
+      var b=S.basins[l.basinId];
+      return "<tr><td style='text-align:center'>"+(b?b.name:"—")+"</td><td style='text-align:center'>"+l.opType+"</td><td style='text-align:center'>"+fd(l.date)+"</td><td style='font-size:12px;color:#555'>"+(l.notes||"—")+"</td></tr>";
+    }).join("");
+    if(!irrigRows)irrigRows="<tr><td colspan='4' style='text-align:center;color:#888;padding:14px'>لا توجد سجلات</td></tr>";
+    var prodRows=prod.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(function(l){
+      var b=S.basins[l.basinId];
+      return "<tr><td style='text-align:center'>"+(b?b.name:"—")+"</td><td style='text-align:center'>"+(l.quantity||"—")+" "+(l.unit||"")+"</td><td style='text-align:center'>"+fd(l.date)+"</td><td style='font-size:12px;color:#555'>"+(l.notes||"—")+"</td></tr>";
+    }).join("");
+    if(!prodRows)prodRows="<tr><td colspan='4' style='text-align:center;color:#888;padding:14px'>لا توجد قطفات</td></tr>";
+    var pw=window.open("","_blank");
+    pw.document.write(`<!DOCTYPE html><html dir='rtl'><head><meta charset='UTF-8'>
+    <link href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap' rel='stylesheet'>
+    <style>
+      *{box-sizing:border-box}
+      body{font-family:Tajawal,Arial,sans-serif;padding:16px;direction:rtl;font-size:13px;color:#111}
+      h2{text-align:center;font-size:20px;margin-bottom:4px}
+      h3{text-align:center;color:#555;font-size:12px;font-weight:400;margin-bottom:14px}
+      h4{font-size:14px;margin:18px 0 8px}
+      .summary{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+      .sum-box{border:1px solid #ddd;border-radius:6px;padding:8px 14px;text-align:center;min-width:90px}
+      .sum-box .n{font-size:20px;font-weight:800}
+      .sum-box .l{font-size:10px;color:#888;margin-top:2px}
+      table{width:100%;border-collapse:collapse;margin-bottom:10px}
+      th{background:#1a1a1a;color:#fff;padding:7px 10px;font-size:12px;text-align:right}
+      td{border:1px solid #e0e0e0;padding:6px 8px;vertical-align:middle}
+      @media print{button{display:none!important}body{padding:8px}}
+    </style></head><body>
+    <h2>🌴 تقرير مزرعة النخيل — ${printTitle}</h2>
+    <h3>تاريخ الطباعة: ${printNow.toLocaleDateString("en-GB")} | إجمالي الأحواض: ${basins.length}</h3>
+    <div class='summary'>
+      <div class='sum-box'><div class='n'>${basins.length}</div><div class='l'>الأحواض</div></div>
+      <div class='sum-box'><div class='n' style='color:blue'>${irrigCount}</div><div class='l'>عمليات ري</div></div>
+      <div class='sum-box'><div class='n' style='color:orange'>${fertCount}</div><div class='l'>عمليات تسميد</div></div>
+      <div class='sum-box'><div class='n' style='color:green'>${totalProd}</div><div class='l'>إجمالي الإنتاج</div></div>
+    </div>
+    <h4>💧 سجل الري والتسميد</h4>
+    <table><thead><tr><th>الحوض</th><th>النوع</th><th>التاريخ</th><th>ملاحظات</th></tr></thead><tbody>${irrigRows}</tbody></table>
+    <h4>🌾 سجل الإنتاج</h4>
+    <table><thead><tr><th>الحوض</th><th>الكمية</th><th>التاريخ</th><th>ملاحظات</th></tr></thead><tbody>${prodRows}</tbody></table>
+    <div style='text-align:center;margin-top:12px'>
+      <button onclick='window.print()' style='padding:10px 28px;font-size:14px;cursor:pointer;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-family:Tajawal'>🖨️ طباعة</button>
+    </div></body></html>`);
+    pw.document.close();
+  }},"🖨️ طباعة التقرير"));
+
+  return w;
+}
+
+// ═══════════════════ MODALS ═══════════════════
+function rModal(){
+  var m=S.modal;
+  var ov=h("div",{cls:"modal-overlay",onClick:function(e){if(e.target===ov)set({modal:null});}});
+  var box=h("div",{cls:"modal"});
+  ov.appendChild(box);
+  if(m.type==="gridSettings")buildGridSettingsForm(box);
+  else if(m.type==="addBasinPick")buildBasinPickGrid(box);
+  else if(m.type==="addBasinDetails")buildBasinDetailsForm(box,m);
+  else if(m.type==="editBasin")buildBasinDetailsForm(box,{type:"editBasinDetails",bid:m.bid});
+  else if(m.type==="basinDetail")rBasinDetail(box,m.bid);
+  else if(m.type==="addIrrig"||m.type==="editIrrig")buildIrrigForm(box,m);
+  else if(m.type==="addProd"||m.type==="editProd")buildProdForm(box,m);
+  return ov;
+}
+
+function mTitle(box,title){
+  box.appendChild(h("div",{cls:"modal-title"},title,
+    h("button",{cls:"close-btn",onClick:()=>set({modal:null})},"×")
+  ));
+}
+
+// إعداد حجم الشبكة
+function buildGridSettingsForm(box){
+  mTitle(box,"⚙️ إعداد شبكة الخريطة");
+  var fRows=h("input",{type:"number",min:"1",max:"30",value:String(S.gridRows)});
+  var fCols=h("input",{type:"number",min:"1",max:"30",value:String(S.gridCols)});
+  box.appendChild(h("div",{cls:"field-lbl"},"عدد الصفوف"));
+  box.appendChild(fRows);
+  box.appendChild(h("div",{cls:"field-lbl"},"عدد الأعمدة"));
+  box.appendChild(fCols);
+  box.appendChild(h("div",{style:{fontSize:"12px",color:"var(--yellow)",marginBottom:"12px"}},"⚠️ تصغير الشبكة قد يخفي أحواض موجودة خارج الحدود الجديدة"));
+  box.appendChild(h("button",{cls:"btn btn-green",onClick:async()=>{
+    var r=parseInt(fRows.value)||6;
+    var c=parseInt(fCols.value)||8;
+    S.gridRows=Math.max(1,Math.min(30,r));
+    S.gridCols=Math.max(1,Math.min(30,c));
+    await saveGridConfig();
+    set({modal:null});
+  }},"💾 حفظ"));
+}
+
+// اختيار موقع الحوض الجديد بالشبكة (نقطتين: البداية والنهاية)
+function buildBasinPickGrid(box){
+  mTitle(box,"📍 حدد موقع الحوض على الشبكة");
+  box.appendChild(h("div",{style:{fontSize:"12px",color:"var(--muted)",marginBottom:"10px"}},"اضغط الخلية الأولى ثم الخلية الأخيرة لتحديد مستطيل الحوض"));
+
+  var startCell=null;
+  var endCell=null;
+
+  var mapWrap=h("div",{cls:"map-wrap",style:{maxHeight:"50vh"}});
+  var grid=h("div",{cls:"map-grid",style:{
+    gridTemplateColumns:"repeat("+S.gridCols+",36px)",
+    gridTemplateRows:"repeat("+S.gridRows+",36px)"
+  }});
+
+  var cells=[];
+  for(var r=0;r<S.gridRows;r++){
+    cells.push([]);
+    for(var c=0;c<S.gridCols;c++){
+      var cell=h("div",{cls:"map-cell",style:{gridRow:(r+1),gridColumn:(c+1)}});
+      (function(rr,cc,cellEl){
+        cellEl.addEventListener("click",function(){
+          if(!startCell){
+            startCell={r:rr,c:cc};
+            endCell={r:rr,c:cc};
+          }else{
+            endCell={r:rr,c:cc};
+          }
+          highlightSelection();
+        });
+      })(r,c,cell);
+      grid.appendChild(cell);
+      cells[r].push(cell);
+    }
+  }
+
+  // إعادة رسم الأحواض الموجودة فوق الشبكة (للسياق البصري، بدون تفاعل)
+  Object.values(S.basins).forEach(function(b){
+    var col=basinColor(b);
+    var basinEl=h("div",{
+      cls:"map-basin",style:{
+        gridRow:(b.r1+1)+" / "+(b.r2+2),
+        gridColumn:(b.c1+1)+" / "+(b.c2+2),
+        background:col,opacity:"0.45",pointerEvents:"none"
+      }
+    },b.name);
+    grid.appendChild(basinEl);
+  });
+
+  function highlightSelection(){
+    for(var rr=0;rr<S.gridRows;rr++)for(var cc=0;cc<S.gridCols;cc++)cells[rr][cc].classList.remove("selecting");
+    if(!startCell)return;
+    var r1=Math.min(startCell.r,endCell.r),r2=Math.max(startCell.r,endCell.r);
+    var c1=Math.min(startCell.c,endCell.c),c2=Math.max(startCell.c,endCell.c);
+    for(var rr2=r1;rr2<=r2;rr2++)for(var cc2=c1;cc2<=c2;cc2++)cells[rr2][cc2].classList.add("selecting");
+    confirmBtn.disabled=false;
+    confirmBtn.style.opacity="1";
+  }
+
+  mapWrap.appendChild(grid);
+  box.appendChild(mapWrap);
+
+  var resetBtn=h("button",{cls:"btn btn-gray btn-sm",style:{marginTop:"10px"},onClick:function(){
+    startCell=null;endCell=null;
+    for(var rr=0;rr<S.gridRows;rr++)for(var cc=0;cc<S.gridCols;cc++)cells[rr][cc].classList.remove("selecting");
+    confirmBtn.disabled=true;
+    confirmBtn.style.opacity="0.5";
+  }},"↺ إعادة التحديد");
+  box.appendChild(resetBtn);
+
+  var confirmBtn=h("button",{cls:"btn btn-green",style:{marginTop:"8px",opacity:"0.5"},onClick:function(){
+    if(!startCell)return;
+    var r1=Math.min(startCell.r,endCell.r),r2=Math.max(startCell.r,endCell.r);
+    var c1=Math.min(startCell.c,endCell.c),c2=Math.max(startCell.c,endCell.c);
+    set({modal:{type:"addBasinDetails",r1:r1,r2:r2,c1:c1,c2:c2}});
+  }},"التالي: تفاصيل الحوض ←");
+  confirmBtn.disabled=true;
+  box.appendChild(confirmBtn);
+}
+
+// تفاصيل الحوض (إضافة أو تعديل)
+function buildBasinDetailsForm(box,m){
+  var isEdit=m.type==="editBasinDetails";
+  var existing=isEdit?S.basins[m.bid]:{};
+  mTitle(box,isEdit?"✏️ تعديل الحوض":"🌴 تفاصيل الحوض الجديد");
+
+  var fName=h("input",{type:"text",placeholder:"اسم/رقم الحوض *",value:existing.name||""});
+  var fVariety=h("input",{type:"text",placeholder:"مثال: خلاص، سكري، برحي...",value:existing.variety||""});
+  var fCount=h("input",{type:"number",placeholder:"عدد النخل التقريبي",value:existing.palmCount||""});
+  var fNotes=h("textarea",{placeholder:"ملاحظات...",rows:"2"},existing.notes||"");
+
+  [["اسم/رقم الحوض *",fName],["الصنف",fVariety],["عدد النخل التقريبي",fCount],["ملاحظات",fNotes]].forEach(([l,el])=>{
+    box.appendChild(h("div",{cls:"field-lbl"},l));
+    box.appendChild(el);
+  });
+
+  box.appendChild(h("button",{cls:"btn btn-green",onClick:async()=>{
+    var name=fName.value.trim();
+    if(!name){alert("يرجى إدخال اسم أو رقم الحوض");return;}
+    var id=isEdit?m.bid:uid();
+    var data={
+      ...(existing||{}),
+      id,name,
+      variety:fVariety.value.trim(),
+      palmCount:fCount.value?parseInt(fCount.value):null,
+      notes:fNotes.value.trim()
+    };
+    if(!isEdit){
+      data.r1=m.r1;data.r2=m.r2;data.c1=m.c1;data.c2=m.c2;
+      var idx=Object.keys(S.basins).length;
+      data.color=BASIN_COLORS[idx%BASIN_COLORS.length];
+    }
+    await saveBasin(data);
+    set({modal:{type:"basinDetail",bid:id}});
+  }},isEdit?"💾 حفظ التعديل":"✅ إضافة الحوض"));
+}
+
+// نموذج سجل الري/التسميد
+function buildIrrigForm(box,m){
+  var isEdit=m.type==="editIrrig";
+  var existing=isEdit?S.irrigLogs[m.lid]:{};
+  mTitle(box,isEdit?"✏️ تعديل السجل":"💧 إضافة سجل ري/تسميد");
+
+  var fBasin=h("select",{});
+  fBasin.appendChild(h("option",{value:""},"— اختر الحوض —"));
+  Object.values(S.basins).forEach(b=>{
+    fBasin.appendChild(h("option",{value:b.id},b.name));
+  });
+  var presetBasin=m.basinId||existing.basinId||"";
+  if(presetBasin)fBasin.value=presetBasin;
+
+  var fType=h("select",{},h("option",{value:"ري"},"💧 ري"),h("option",{value:"تسميد"},"🌱 تسميد"));
+  if(existing.opType)fType.value=existing.opType;
+
+  var fDate=h("input",{type:"date",value:existing.date||today()});
+  var fNotes=h("textarea",{placeholder:"ملاحظات...",rows:"2"},existing.notes||"");
+
+  if(!Object.values(S.basins).length){
+    box.appendChild(h("div",{style:{color:"var(--yellow)",fontSize:"12px",marginBottom:"10px"}},"⚠️ لا توجد أحواض مضافة بعد. أضف حوض أولاً من الخريطة."));
+  }
+
+  [["الحوض *",fBasin],["نوع العملية *",fType],["التاريخ *",fDate],["ملاحظات",fNotes]].forEach(([l,el])=>{
+    box.appendChild(h("div",{cls:"field-lbl"},l));
+    box.appendChild(el);
+  });
+
+  box.appendChild(h("button",{cls:"btn btn-green",onClick:async()=>{
+    if(!fBasin.value){alert("يرجى اختيار الحوض");return;}
+    if(!fDate.value){alert("يرجى إدخال التاريخ");return;}
+    var id=isEdit?m.lid:uid();
+    var data={id,basinId:fBasin.value,opType:fType.value,date:fDate.value,notes:fNotes.value.trim()};
+    await saveIrrigLog(data);
+    if(m.basinId||existing.basinId){
+      set({modal:{type:"basinDetail",bid:fBasin.value}});
+    }else{
+      set({modal:null,tab:"irrigation"});
+    }
+  }},isEdit?"💾 حفظ":"✅ إضافة السجل"));
+}
+
+// نموذج سجل الإنتاج
+function buildProdForm(box,m){
+  var isEdit=m.type==="editProd";
+  var existing=isEdit?S.prodLogs[m.lid]:{};
+  mTitle(box,isEdit?"✏️ تعديل القطفة":"🌾 إضافة قطفة جديدة");
+
+  var fBasin=h("select",{});
+  fBasin.appendChild(h("option",{value:""},"— اختر الحوض —"));
+  Object.values(S.basins).forEach(b=>{
+    fBasin.appendChild(h("option",{value:b.id},b.name));
+  });
+  var presetBasin=m.basinId||existing.basinId||"";
+  if(presetBasin)fBasin.value=presetBasin;
+
+  var fDate=h("input",{type:"date",value:existing.date||today()});
+  var fQty=h("input",{type:"number",step:"0.1",placeholder:"الكمية",value:existing.quantity||""});
+  var fUnit=h("select",{},h("option",{value:"كيلو"},"كيلو"),h("option",{value:"صندوق"},"صندوق"),h("option",{value:"طن"},"طن"));
+  if(existing.unit)fUnit.value=existing.unit;
+  var fNotes=h("textarea",{placeholder:"ملاحظات الجودة...",rows:"2"},existing.notes||"");
+
+  if(!Object.values(S.basins).length){
+    box.appendChild(h("div",{style:{color:"var(--yellow)",fontSize:"12px",marginBottom:"10px"}},"⚠️ لا توجد أحواض مضافة بعد. أضف حوض أولاً من الخريطة."));
+  }
+
+  [["الحوض *",fBasin],["تاريخ القطف *",fDate],["الكمية *",fQty],["الوحدة",fUnit],["ملاحظات",fNotes]].forEach(([l,el])=>{
+    box.appendChild(h("div",{cls:"field-lbl"},l));
+    box.appendChild(el);
+  });
+
+  box.appendChild(h("button",{cls:"btn btn-green",onClick:async()=>{
+    if(!fBasin.value){alert("يرجى اختيار الحوض");return;}
+    if(!fDate.value){alert("يرجى إدخال التاريخ");return;}
+    if(!fQty.value){alert("يرجى إدخال الكمية");return;}
+    var id=isEdit?m.lid:uid();
+    var data={id,basinId:fBasin.value,date:fDate.value,quantity:parseFloat(fQty.value),unit:fUnit.value,notes:fNotes.value.trim()};
+    await saveProdLog(data);
+    if(m.basinId||existing.basinId){
+      set({modal:{type:"basinDetail",bid:fBasin.value}});
+    }else{
+      set({modal:null,tab:"production"});
+    }
+  }},isEdit?"💾 حفظ":"✅ إضافة القطفة"));
+}
+
+loadData();
+</script>
+</body>
+</html>
