@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خريطة الري - المزرعة</title>
+<style>
+:root{--bg:#f6f1e7;--cd:#fff;--tx:#2a2a22;--mu:#7a7565;--bd:#d9d0bb;--ac:#2f7d4f;--wt:#1f8fe0;--rd:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171a16;--cd:#232720;--tx:#ece8dc;--mu:#a49f8e;--bd:#3b4036;--ac:#5cb87f}}
+:root[data-theme="dark"]{--bg:#171a16;--cd:#232720;--tx:#ece8dc;--mu:#a49f8e;--bd:#3b4036;--ac:#5cb87f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Tahoma,"Segoe UI",system-ui,sans-serif}
+body{padding:10px}
+h1{font-size:18px;margin:4px 0 8px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+button{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--bd);background:var(--cd);color:var(--tx);border-radius:8px}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.hint{font-size:12px;color:var(--mu);margin:0 0 8px;min-height:16px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--bd);border-radius:10px;background:#000}
+.wrap.w2{background:var(--cd)}
+.w3{overflow:hidden;background:#bcd8ee;touch-action:none}
+.w3 canvas{display:block;touch-action:none}
+svg{display:block}
+.ln{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hit{fill:none;stroke:transparent;cursor:pointer}
+.vl{cursor:pointer;touch-action:none}
+.tk{cursor:grab;touch-action:none}
+.lb{font-weight:700;text-anchor:middle;paint-order:stroke;stroke:#000;fill:#fff}
+.pn{font-size:8.5px;fill:var(--tx);text-anchor:middle}
+.vn{font-size:10px;font-weight:700;fill:#fff;text-anchor:middle}
+.ln0{font-size:11px;font-weight:700;fill:var(--tx);text-anchor:middle}
+.tt{font-size:11px;fill:var(--tx)}
+.pm,.vv{cursor:pointer}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px}
+.card h2{font-size:14px;margin:0 0 8px}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:8px}
+input[type=text],input[type=number]{width:100%;font:inherit;padding:7px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);margin-top:3px}
+.mut{color:var(--mu);font-size:13px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.stats b{display:block;font-size:19px;color:var(--ac)}
+.stats span{font-size:11px;color:var(--mu)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.row .n{flex:1}
+.row small{color:var(--mu)}
+.sw{min-width:64px;padding:5px 8px;font-size:12px}
+.sw.o{background:#2f9e5b;color:#fff;border-color:#2f9e5b}
+.sw.c{background:var(--rd);color:#fff;border-color:var(--rd)}
+.dng{color:var(--rd);border-color:var(--rd)}
+</style>
+</head>
+<body>
+<h1>🚰 خريطة الري - المزرعة <span id="cloud" style="font-size:12px;font-weight:400;color:var(--mu)">☁️ …</span></h1>
+<div class="bar"><button id="v0" class="on">3D</button><button id="v1">الخريطة</button><button id="v2">المخطط</button><button id="zi">＋</button><button id="zo">－</button></div>
+<div id="dv"><p class="hint">اسحب للدوران، قرّص بإصبعين للتكبير والتحريك. اضغط على المحبس لفتحه أو قفله، واضغط على نخلة في الخطوط لرقمها. أخضر فاتح = ينسقى الحين.</p><div class="bar"><button id="cm">🎨 تلوين النخيل: حسب الحالة</button></div><div class="wrap w3" id="w3"><canvas id="cv"></canvas></div><div class="card" id="pinfo3"><p class="mut">اضغط على محبس أو نخلة.</p></div></div>
+<div id="mapv" style="display:none">
+<div class="bar" id="tb">
+<button data-t="sel" class="on">تحريك / تشغيل</button>
+<button data-t="draw">+ خط جديد</button>
+<button data-t="tank">+ خزان</button>
+<button data-t="del">حذف</button>
+<button id="lk" class="on">🔒 الخطوط مثبتة</button>
+<button id="pic" class="on">النخيل</button>
+</div>
+<p class="hint" id="hint"></p>
+<div class="wrap"><svg id="sv" viewBox="0 0 821 1459">
+<g id="imgs"></g>
+<g id="gR"></g><g id="gL"></g><g id="gT"></g><g id="gV"></g><g id="gD"></g>
+</svg></div>
+<div class="bar" id="fin" style="display:none;margin-top:8px"><button id="ok" class="on">تم - إنهاء الخط</button><button id="cx">إلغاء</button></div>
+</div>
+<div id="schv" style="display:none">
+<p class="hint">كل نخلة لها رقم متسلسل، وكل خط له محبس مرقم (م1، م2...). اضغط على المحبس لفتحه أو قفله، واضغط على أي نخلة لتفاصيلها. نخيل الخط المقفل يظهر باهت.</p>
+<div class="wrap w2"><svg id="sch"></svg></div>
+<div class="card" id="pinfo"><p class="mut">اضغط على أي نخلة لمعرفة رقمها وخطها.</p></div>
+</div>
+<div class="card"><h2>تعديل العنصر</h2><div id="pn"></div></div>
+<div class="card"><h2>الملخص</h2><div id="sm"></div></div>
+<div class="card"><h2>الخطوط والمحابس</h2>
+<div class="bar"><button id="ao">فتح الكل</button><button id="ac2">قفل الكل</button></div><div id="ls"></div></div>
+<div class="card"><button class="dng" id="rs">إرجاع الخطوط الأصلية</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const NS='http://www.w3.org/2000/svg',$=s=>document.querySelector(s);
+const sv=$('#sv'),sch=$('#sch'),gR=$('#gR'),gL=$('#gL'),gT=$('#gT'),gV=$('#gV'),gD=$('#gD');
+const HINT={sel:'اضغط على المحبس عشان تفتح/تقفل الخط. اسحب المحبس أو الخزان لتحريكه. اضغط على الخط لتعديله.',draw:'اضغط على الصورة على نقاط الخط من البداية للنهاية، وبعدين "تم".',tank:'اضغط على الصورة لوضع خزان.',del:'اضغط على خط أو خزان لحذفه.'};
+const uid=()=>'n'+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const M=(x,y)=>[Math.round(30+(x-75)*.463),Math.round(818+(y-1735)*.463)];
+const DL=[[111.2, 388.1, 111.2, 53.0, 30, 5.9, 111.2, 220.6], [134.8, 388.1, 134.8, 53.0, 30, 5.9, 134.8, 220.6], [158.0, 388.1, 158.0, 53.0, 30, 5.9, 158.0, 220.6], [111.2, 723.2, 111.2, 388.1, 30, 5.9, 111.2, 555.7], [134.8, 723.2, 134.8, 388.1, 30, 5.9, 134.8, 555.7], [158.0, 723.2, 158.0, 388.1, 30, 5.9, 158.0, 555.7], [111.2, 1062.7, 111.2, 723.2, 29, 5.9, 111.2, 897.6, [728.8, 740.0, 751.1, 762.3, 773.5, 784.7, 795.8, 807.0, 818.2, 829.3, 840.5, 851.7, 862.8, 874.0, 885.2, 910.0, 921.3, 932.6, 943.9, 955.2, 966.5, 977.9, 989.2, 1000.5, 1011.8, 1023.1, 1034.4, 1045.7, 1057.0]], [134.8, 1062.7, 134.8, 723.2, 29, 5.9, 134.8, 897.6, [728.8, 740.0, 751.1, 762.3, 773.5, 784.7, 795.8, 807.0, 818.2, 829.3, 840.5, 851.7, 862.8, 874.0, 885.2, 910.0, 921.3, 932.6, 943.9, 955.2, 966.5, 977.9, 989.2, 1000.5, 1011.8, 1023.1, 1034.4, 1045.7, 1057.0]], [158.0, 1062.7, 158.0, 723.2, 29, 5.9, 158.0, 897.6, [728.8, 740.0, 751.1, 762.3, 773.5, 784.7, 795.8, 807.0, 818.2, 829.3, 840.5, 851.7, 862.8, 874.0, 885.2, 910.0, 921.3, 932.6, 943.9, 955.2, 966.5, 977.9, 989.2, 1000.5, 1011.8, 1023.1, 1034.4, 1045.7, 1057.0]], [62.0, 388.1, 62.0, 53.0, 30, 6.0, 62.0, 220.6], [85.0, 388.1, 85.0, 53.0, 30, 5.5, 85.0, 220.6], [62.0, 723.2, 62.0, 388.1, 30, 6.0, 62.0, 555.7], [85.0, 723.2, 85.0, 388.1, 30, 5.5, 85.0, 555.7], [62.0, 1062.7, 62.0, 723.2, 29, 6.0, 62.0, 897.6, [728.8, 740.0, 751.1, 762.3, 773.5, 784.7, 795.8, 807.0, 818.2, 829.3, 840.5, 851.7, 862.8, 874.0, 885.2, 910.0, 921.3, 932.6, 943.9, 955.2, 966.5, 977.9, 989.2, 1000.5, 1011.8, 1023.1, 1034.4, 1045.7, 1057.0]], [85.0, 1062.7, 85.0, 723.2, 29, 5.5, 85.0, 897.6, [728.8, 740.0, 751.1, 762.3, 773.5, 784.7, 795.8, 807.0, 818.2, 829.3, 840.5, 851.7, 862.8, 874.0, 885.2, 910.0, 921.3, 932.6, 943.9, 955.2, 966.5, 977.9, 989.2, 1000.5, 1011.8, 1023.1, 1034.4, 1045.7, 1057.0]], [62.0, 1415.0, 62.0, 1067.0, 29, 6.0, 62.0, 1236.0, [1078.7, 1089.7, 1100.7, 1111.7, 1122.7, 1133.7, 1144.7, 1155.7, 1166.7, 1177.7, 1195.0, 1206.9, 1218.8, 1230.7, 1242.6, 1254.5, 1266.3, 1278.2, 1290.1, 1302.0, 1313.9, 1325.8, 1337.7, 1349.6, 1361.5, 1373.3, 1385.2, 1397.1, 1409.0]], [85.0, 1415.0, 85.0, 1067.0, 29, 5.5, 85.0, 1236.0, [1078.7, 1089.7, 1100.7, 1111.7, 1122.7, 1133.7, 1144.7, 1155.7, 1166.7, 1177.7, 1195.0, 1206.9, 1218.8, 1230.7, 1242.6, 1254.5, 1266.3, 1278.2, 1290.1, 1302.0, 1313.9, 1325.8, 1337.7, 1349.6, 1361.5, 1373.3, 1385.2, 1397.1, 1409.0]], [111.2, 1415.0, 111.2, 1067.0, 29, 5.9, 111.2, 1236.0, [1078.7, 1089.7, 1100.7, 1111.7, 1122.7, 1133.7, 1144.7, 1155.7, 1166.7, 1177.7, 1195.0, 1206.5, 1218.1, 1229.7, 1241.2, 1252.8, 1264.3, 1275.8, 1287.4, 1299.0, 1310.5, 1322.0, 1340.0, 1351.5, 1363.0, 1374.5, 1386.0, 1397.5, 1409.0]], [134.8, 1415.0, 134.8, 1067.0, 29, 5.9, 134.8, 1236.0, [1078.7, 1089.7, 1100.7, 1111.7, 1122.7, 1133.7, 1144.7, 1155.7, 1166.7, 1177.7, 1195.0, 1206.5, 1218.1, 1229.7, 1241.2, 1252.8, 1264.3, 1275.8, 1287.4, 1299.0, 1310.5, 1322.0, 1340.0, 1351.5, 1363.0, 1374.5, 1386.0, 1397.5, 1409.0]], [158.0, 1415.0, 158.0, 1067.0, 29, 5.9, 158.0, 1236.0, [1078.7, 1089.7, 1100.7, 1111.7, 1122.7, 1133.7, 1144.7, 1155.7, 1166.7, 1177.7, 1195.0, 1206.5, 1218.1, 1229.7, 1241.2, 1252.8, 1264.3, 1275.8, 1287.4, 1299.0, 1310.5, 1322.0, 1340.0, 1351.5, 1363.0, 1374.5, 1386.0, 1397.5, 1409.0]]];
+const PLOTS=[{n:1,name:'القسيمة 1',x0:197,y0:58,p:11.5,rows:48,cols:14},{n:4,name:'القسيمة 4',x0:604,y0:600,p:11.55,rows:18,cols:18,vleft:true},{n:5,name:'القسيمة 5',x0:604,y0:807.9,p:11.55,rows:20,cols:18,vleft:true},{n:6,name:'القسيمة 6',x0:392.3,y0:576.9,p:11.55,rows:20,cols:18,vright:true},{n:7,name:'القسيمة 7',x0:392.3,y0:807.9,p:11.55,rows:20,cols:18,vright:true},{n:8,name:'القسيمة 8',x0:486.4,y0:1346,p:11.3,py:11.5,rows:7,cols:30},{n:9,name:'القسيمة 9',x0:486.4,y0:1197,p:11.3,py:11.4,rows:12,cols:30},{n:10,name:'القسيمة 10',x0:396,y0:1043,p:11.3,py:11.25,rows:13,cols:38,single:true,vat:20},{n:11,name:'القسيمة 11',x0:173.7,y0:1340,p:11.55,py:11.5,rows:7,cols:18,ext:{x0:396,p:11.3,n:8,y0:1346,py:11.5}},{n:12,name:'القسيمة 12',x0:173.7,y0:1195,p:11.55,py:11.55,rows:12,cols:18,ext:{x0:396,p:11.3,n:8,y0:1197,py:11.4}},{n:13,name:'القسيمة 13',x0:173.7,y0:1034.7,p:11.55,py:11,rows:14,cols:18,nolines:true,from:'r'},{n:19,name:'القسيمة 19',x0:31,y0:840,p:10,py:11.82,rows:50,cols:2,nolines:true},{n:20,name:'القسيمة 20',x0:32,y0:41.5,p:9.5,py:11.51,rows:68,cols:2,nolines:true},{n:21,name:'القسيمة 21',x0:32,y0:28,p:11.4,py:11.5,rows:1,cols:27,nolines:true},{n:22,name:'القسيمة 22',x0:32,y0:1432,p:11.66,py:11.5,rows:1,cols:30,nolines:true},{n:23,name:'القسيمة 23',x0:184,y0:924,p:11.6,py:11,rows:10,cols:6,nolines:true},{n:24,name:'القسيمة 24',x0:253.4,y0:990,p:11.6,py:11,rows:4,cols:10,nolines:true,from:'r'},{n:25,name:'القسيمة 25',x0:253.4,y0:979,p:11.6,py:11,rows:1,cols:1,nolines:true},{n:26,name:'القسيمة 26',x0:184,y0:625,p:11.6,py:12.17,rows:24,cols:6,nolines:true},{n:27,name:'القسيمة 27',x0:253.4,y0:625,p:11.6,py:11,rows:17,cols:10,nolines:true,from:'r'},{n:28,name:'القسيمة 28',x0:253.4,y0:812,p:11.6,py:11,rows:1,cols:8,nolines:true,from:'r'},{n:29,name:'القسيمة 29',x0:253.4,y0:823,p:11.6,py:11,rows:2,cols:5,nolines:true,from:'r'},{n:30,name:'القسيمة 30',pts:[[295.6,864.3],[281.3,866],[297.2,876.3],[284.5,878.6],[296.4,891.3]],x0:0,y0:0,p:1,rows:1,cols:5,nolines:true},{n:31,name:'القسيمة 31',pts:[[248.9,905.2],[262.7,903.8],[250.8,914.8],[262.7,913.9],[252.6,938.6],[263.6,938.6],[266.3,950.6],[278.3,950.6],[292,949.7]],x0:0,y0:0,p:1,rows:1,cols:9,nolines:true},{n:32,name:'القسيمة 32',pts:[[351.5,866],[341,866],[330,866],[319,866],[351.5,877.5],[341,877.5],[330,877.5],[319,877.5],[351.5,889],[341,889],[330,889],[319,889],[351.5,904.8],[341,904.8],[330,904.8],[351.5,916.3],[341,916.3],[330,916.3]],x0:0,y0:0,p:1,rows:1,cols:18,nolines:true},{n:33,name:'القسيمة 33',pts:[[353,940],[341.7,940],[330.6,940],[320.7,940],[342,951],[331.7,951],[321,951]],x0:0,y0:0,p:1,rows:1,cols:7,nolines:true},{n:34,name:'القسيمة 34',pts:[[382,872.2],[382,883.8],[382,895.4],[371,895.4],[382,907.0],[371,907.0],[382,918.6],[371,918.6],[382,930.2],[371,930.2],[382,941.8],[371,941.8],[382,953.4],[371,953.4],[382,965.0],[371,965.0],[382,976.6],[371,976.6],[382,988.2],[371,988.2],[382,999.8],[371,999.8],[382,1011.4],[371,1011.4],[382,1023.0],[371,1023.0]],x0:0,y0:0,p:1,rows:1,cols:26,nolines:true},{n:35,name:'القسيمة 35',pts:[[382,1035],[393.8,1035],[405.4,1035],[416.3,1035],[429.8,1035],[454,1035]],x0:0,y0:0,p:1,rows:1,cols:6,nolines:true},{n:36,name:'القسيمة 36',pts:[[632.0,1035],[643.5,1035],[655.0,1035],[678.0,1035],[689.5,1035],[701.0,1035],[712.5,1035],[724.0,1035],[735.5,1035],[758.5,1035],[770.0,1035],[781.5,1035]],x0:0,y0:0,p:1,rows:1,cols:12,nolines:true}];
+PLOTS.forEach(pl=>{if(!pl.pts)return;const xs=pl.pts.map(q=>q[0]),ys=pl.pts.map(q=>q[1]);pl.bb=[Math.min(...xs)-4.5,Math.min(...ys)-4.5,Math.max(...xs)+4.5,Math.max(...ys)+4.5]});
+const PONLY=PLOTS.filter(p=>p.nolines),GP=[];PONLY.forEach(pl=>{if(pl.pts){pl.pts.forEach((q,i)=>GP.push({x:q[0],y:q[1],pl,r:1,c:i+1,num:i+1}));return}const py=pl.py||pl.p,fr=pl.from==='r';for(let r=0;r<pl.rows;r++)for(let c=0;c<pl.cols;c++){const cc=fr?pl.cols-1-c:c;GP.push({x:+(pl.x0+cc*pl.p).toFixed(1),y:+(pl.y0+r*py).toFixed(1),pl,r:r+1,c:c+1,num:r*pl.cols+c+1})}});
+const gpl=pl=>({id:'q'+pl.n,name:'',plot:pl.n,k:'row',n:pl.rows*pl.cols,open:true});
+const inPO=(x,y)=>PONLY.some(pl=>{if(pl.bb)return x>pl.bb[0]&&x<pl.bb[2]&&y>pl.bb[1]&&y<pl.bb[3];const py=pl.py||pl.p;return x>pl.x0-pl.p/2&&x<pl.x0+(pl.cols-.5)*pl.p&&y>pl.y0-py/2&&y<pl.y0+(pl.rows-.5)*py});
+function defaults(){
+ const L=DL.map((d,i)=>({id:'l'+(i+1),name:'خط '+(i+1),pts:[[d[0],d[1]],[d[2],d[3]]],vx:d[6]??d[0],vy:d[7]??d[1],open:true,side:d[4],off:d[5],ys:d[8]}));
+ L.slice(0,9).forEach((l,i)=>{l.k='col';l.plot=2;l.lab='2-'+(i+1);l.grp='p2z'+(Math.floor(i/3)+1)});L.slice(9,15).forEach((l,i)=>{l.k='col';l.plot=3;l.lab='3-'+(i+1);l.grp='p3z'+(Math.floor(i/2)+1)});L.slice(15,20).forEach((l,i)=>{l.k='col';l.plot=14;l.lab='ف'+(i+1);l.grp='z14';l.name='فرع '+(i+1)});
+ PLOTS.forEach(pl=>{if(pl.nolines)return;const py=pl.py||pl.p;if(pl.single){for(let r=0;r<pl.rows;r++){const y=+(pl.y0+r*py+3).toFixed(2);L.push({id:'p'+pl.n+'s'+(r+1),name:'خط '+(r+1),k:'hrow',plot:pl.n,side:pl.cols,off:3,one:true,hf:pl.vat,pts:[[pl.x0-pl.p/2,y],[pl.x0+(pl.cols-.5)*pl.p,y]],vx:+(pl.x0+(pl.vat-.5)*pl.p).toFixed(1),vy:y,open:true,lab:pl.n+'-'+(r+1)})}return}for(let r=0;r<pl.rows/2;r++){const y=+(pl.y0+(2*r+.5)*py).toFixed(2);if(pl.ext){const e=pl.ext,rw=[2*r,2*r+1].filter(q=>q<pl.rows),pp=[];rw.forEach(q=>{for(let j=0;j<pl.cols;j++)pp.push([+(pl.x0+j*pl.p).toFixed(1),+(pl.y0+q*py).toFixed(1)]);for(let j=0;j<e.n;j++)pp.push([+(e.x0+j*e.p).toFixed(1),+(e.y0+q*e.py).toFixed(1)])});const sd=pl.cols+e.n,ye=+(e.y0+(2*r+.5)*e.py).toFixed(2),h=sd/2;L.push({id:'p'+pl.n+'h'+(r+1),name:'خط '+(r+1),k:'hrow',plot:pl.n,side:sd,off:py/2,one:2*r+1>=pl.rows,pp,pts:[[pl.x0-pl.p/2,y],[372,y],[388,ye],[e.x0+(e.n-.5)*e.p,ye]],vx:+((pp[h-1][0]+pp[h][0])/2).toFixed(1),vy:y,open:true,lab:pl.n+'-'+(r+1)});continue}L.push({id:'p'+pl.n+'h'+(r+1),name:'خط '+(r+1),k:'hrow',plot:pl.n,side:pl.cols,off:py/2,one:2*r+1>=pl.rows,pts:[[pl.x0-pl.p/2,y],[pl.x0+(pl.cols-1)*pl.p+pl.p/2,y]],vx:pl.vleft?pl.x0-pl.p/2:pl.vright?pl.x0+(pl.cols-1)*pl.p+pl.p/2:pl.x0+(pl.cols/2-.5)*pl.p,vy:y,open:true,lab:pl.n+'-'+(r+1)})}});
+ return{L,T:[{id:'t1',x:31.9,y:825.9,name:'خزان 1',cap:0,note:'على حافة المزرعة'},{id:'t2',x:581,y:827,name:'خزان 2',cap:0,note:'وسط المزرعة جنب الممر'},{id:'t3',x:612,y:827,name:'خزان 3',cap:0,note:'وسط المزرعة جنب الممر'},{id:'t4',x:794.3,y:1028,name:'خزان 4',cap:0,note:'قرب الحافة الشرقية'}]}}
+function load(){try{const a=JSON.parse(localStorage.getItem('irr23'));if(a){a.L=a.L.filter(l=>!PONLY.some(pl=>l.plot===pl.n));const d=defaults();a.L.forEach(l=>{const m=d.L.find(x=>x.id===l.id);if(m){const{open,name}=l;Object.assign(l,m,{open,name})}});d.L.forEach(l=>{if(!a.L.some(x=>x.id===l.id))a.L.push(l)});return a}const o=JSON.parse(localStorage.getItem('irr22'))||JSON.parse(localStorage.getItem('irr21'));if(!o)return null;const d=defaults();d.L.forEach(l=>{if(l.id.startsWith('p6h')||l.id.startsWith('p7h'))return;const m=o.L.find(x=>x.id===l.id);if(m){l.open=m.open;l.name=m.name}});d.T.forEach(t=>{const m=(o.T||[]).find(x=>x.id===t.id);if(m){t.x=m.x;t.y=m.y;t.cap=m.cap;t.note=m.note;t.name=m.name}});return d}catch(e){return null}}
+function save(){try{localStorage.setItem('irr23',JSON.stringify(S))}catch(e){}cloudPush()}
+let S=load()||defaults(),tool='sel',sel=null,selT=null,drag=null,cur=[],vw='d',zw=Math.max(innerWidth-30,360)*1.6,zs=0,sW=1400;
+sv.style.width=zw+'px';
+function e(tag,a,par,txt){const x=document.createElementNS(NS,tag);for(const k in a)x.setAttribute(k,a[k]);if(txt!=null)x.textContent=txt;par&&par.appendChild(x);return x}
+const pd=l=>'M'+l.pts.map(p=>p.join(' ')).join('L');
+const kk=()=>{const w=sv.getBoundingClientRect().width;return w?821/w:1.2};
+function render(){
+ const k=kk();
+ gR.innerHTML=gL.innerHTML=gT.innerHTML=gV.innerHTML=gD.innerHTML='';let rs='';
+ S.L.forEach((l,i)=>{const on=sel===l.id,row=l.k==='row'||l.k==='hrow',w=row?Math.min(k,.6):l.k==='col'?Math.min(k,.9):k,rv=Math.min(7*k,5);
+  if(row||l.k==='col')rs+=`<g opacity="${l.open?1:.4}">`+(l.k==='row'?rowPos(l):l.k==='hrow'?hPos(l):colPos(l)).map(p=>`<use href="#pmk" x="${p[0]}" y="${p[1]}"/>`).join('')+'</g>';
+  if(l.open){e('path',{d:pd(l),class:'ln',stroke:'#fff','stroke-opacity':.6,'stroke-width':(on?8:6)*w},gL);e('path',{d:pd(l),class:'ln',stroke:'#1f8fe0','stroke-width':(on?5:3.5)*w},gL)}
+  else e('path',{d:pd(l),class:'ln',stroke:'#ff5a5a','stroke-width':3*w,'stroke-dasharray':`${7*w} ${5*w}`},gL);
+  e('path',{d:pd(l),class:'hit','data-l':l.id,'stroke-width':row?Math.min(20*k,9):20*k},gL);
+  const g=e('g',{class:'vl','data-v':l.id,transform:`translate(${l.vx},${l.vy})`},gV);
+  e('circle',{r:row?Math.min(14*k,5.6):14*k,fill:'transparent'},g);
+  e('circle',{r:rv,fill:l.open?'#2f9e5b':'#d64545',stroke:on?'#ffd23f':'#fff','stroke-width':(on?3:2)*(row?Math.min(k,.5):k)},g);
+  if(!row||k<.75)e('text',{y:-(rv+2*k),class:'lb',style:`font-size:${9*k}px;stroke-width:${2.5*k}px`},g,vlab(l,i))});
+ gR.innerHTML=rs;
+ S.T.forEach(t=>{const g=e('g',{class:'tk','data-t':t.id,transform:`translate(${t.x},${t.y})`},gT);
+  e('rect',{x:-11*k,y:-11*k,width:22*k,height:22*k,rx:4*k,fill:'#1aa6b7',stroke:selT===t.id?'#ffd23f':'#fff','stroke-width':(selT===t.id?3:2)*k},g);
+  e('text',{y:4*k,class:'lb',style:`font-size:${12*k}px;stroke:none`},g,'💧');
+  e('text',{y:24*k,class:'lb',style:`font-size:${10*k}px;stroke-width:${2.5*k}px`},g,t.name+(t.cap?' · '+t.cap+' م³':''))});
+ if(cur.length){e('path',{d:'M'+cur.map(p=>p.join(' ')).join('L'),class:'ln',stroke:'#ffd23f','stroke-width':3*k},gD);cur.forEach(p=>e('circle',{cx:p[0],cy:p[1],r:3*k,fill:'#ffd23f'},gD))}
+ sv.style.cursor=tool==='draw'||tool==='tank'?'crosshair':'default';
+ if(vw==='s')drawSch();if(vw==='d'&&T3)buildLines3()}
+function pt(ev){const p=sv.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(sv.getScreenCTM().inverse())}
+function setTool(t){if(LOCK&&['draw','tank','del'].includes(t)){$('#hint').textContent='الخطوط والمحابس مثبتة ما تتحرك ولا تنحذف. اضغط زر 🔒 لفتح التثبيت أول.';return}tool=t;cur=[];$('#fin').style.display=t==='draw'?'flex':'none';document.querySelectorAll('#tb [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#hint').textContent=HINT[t];render()}
+let moved=false;
+sv.addEventListener('pointerdown',ev=>{
+ const t=ev.target,p=pt(ev),vid=t.closest('[data-v]')?.dataset.v,tid=t.closest('[data-t]')?.dataset.t,lid=t.dataset.l;
+ if(tool==='del'){const id=vid||lid;if(id){S.L=S.L.filter(l=>l.id!==id);sel=null}else if(tid)S.T=S.T.filter(x=>x.id!==tid);save();render();panel();return}
+ if(tool==='draw'){cur.push([Math.round(p.x),Math.round(p.y)]);render();return}
+ if(tool==='tank'){const o={id:uid(),x:Math.round(p.x),y:Math.round(p.y),name:'خزان '+(S.T.length+1),cap:0,note:''};S.T.push(o);sel=null;selT=o.id;save();setTool('sel');panel();return}
+ if(vid){const l=S.L.find(x=>x.id===vid);sel=vid;selT=null;drag={k:'v',o:l,dx:p.x-l.vx,dy:p.y-l.vy};moved=false;sv.setPointerCapture(ev.pointerId);render();panel();return}
+ if(tid){const o=S.T.find(x=>x.id===tid);selT=tid;sel=null;drag={k:'t',o,dx:p.x-o.x,dy:p.y-o.y};moved=false;sv.setPointerCapture(ev.pointerId);render();panel();return}
+ if(lid){sel=lid;selT=null;render();panel();return}
+ sel=selT=null;render();panel()});
+sv.addEventListener('pointermove',ev=>{if(!drag||LOCK)return;const p=pt(ev),x=p.x-drag.dx,y=p.y-drag.dy,k=kk();
+ if(!moved&&Math.hypot(x-(drag.k==='v'?drag.o.vx:drag.o.x),y-(drag.k==='v'?drag.o.vy:drag.o.y))<5*k)return;moved=true;
+ if(drag.k==='v'){drag.o.vx=Math.round(x);drag.o.vy=Math.round(y)}else{drag.o.x=Math.round(x);drag.o.y=Math.round(y)}render()});
+sv.addEventListener('pointerup',()=>{if(!drag)return;if(drag.k==='v'&&!moved){drag.o.open=!drag.o.open;panel()}drag=null;save();render();sum()});
+$('#ok').onclick=()=>{if(cur.length>1){const n=S.L.length+1,a=cur[0];const o={id:uid(),name:'خط '+n,pts:cur.slice(),vx:a[0],vy:a[1],open:true,side:15};S.L.push(o);sel=o.id;save()}setTool('sel');panel()};
+$('#cx').onclick=()=>setTool('sel');
+const cnt=l=>l.k==='row'?l.n:l.side*(l.one?1:2),vlab=(l,i)=>l.lab||('م'+(i+1));
+function hPos(l){if(l.pp)return l.pp;const a=l.pts[0],b=l.pts[l.pts.length-1],lo=Math.min(a[0],b[0]),L=Math.abs(b[0]-a[0]),cy=(a[1]+b[1])/2,ff=l.off||5.75,o=[];for(let g=0;g<(l.one?1:2);g++)for(let j=0;j<l.side;j++)o.push([lo+(j+.5)*L/l.side,cy+(g?ff:-ff)]);return o}
+function colPos(l){const a=l.pts[0],b=l.pts[l.pts.length-1],lo=Math.min(a[1],b[1]),L=Math.abs(b[1]-a[1]),cx=(a[0]+b[0])/2,ff=l.off||5.5,o=[];for(let g=0;g<2;g++)for(let j=0;j<l.side;j++)o.push([cx+(g?-ff:ff),l.ys?l.ys[j]:lo+(j+.5)*L/l.side]);return o}
+function rowPos(l){const a=l.pts[0],b=l.pts[l.pts.length-1],lo=Math.min(a[0],b[0]),L=Math.abs(b[0]-a[0]),y=(a[1]+b[1])/2-(l.off||4);return Array.from({length:l.n},(_,j)=>[lo+(j+.5)*L/l.n,y])}
+function panel(){
+ const l=S.L.find(x=>x.id===sel),t=S.T.find(x=>x.id===selT),el=$('#pn');
+ if(!l&&!t){el.innerHTML='<p class="mut">اختر خط أو خزان من الخريطة لتعديله.</p>';sum();return}
+ let h=`<label>الاسم<input type="text" id="f_name" value="${esc((l||t).name)}"></label>`;
+ if(l)h+=(l.k==='row'?`<label>عدد النخيل في الخط (نصفها يسار ونصفها يمين من المحبس)<input type="number" id="f_n" min="2" value="${l.n}"></label>`:`<label>عدد النخيل في كل جهة من الخط (يمين = يسار)<input type="number" id="f_side" min="0" value="${l.side}"></label>`)+`<label><input type="checkbox" id="f_open" ${l.open?'checked':''}> المحبس مفتوح</label>`;
+ if(t)h+=`<label>السعة (م³)<input type="number" id="f_cap" min="0" value="${t.cap||0}"></label><label>وصف الموقع<input type="text" id="f_note" value="${esc(t.note)}"></label>`;
+ if(!LOCK)h+='<button class="dng" id="f_del">حذف</button>';el.innerHTML=h;
+ const o=l||t,bind=(id,k,num)=>{const i=$('#'+id);if(i)i.oninput=()=>{o[k]=num?Math.max(0,+i.value||0):i.value;save();render();sum()}};
+ bind('f_name','name');bind('f_side','side',1);bind('f_n','n',1);bind('f_cap','cap',1);bind('f_note','note');
+ const c=$('#f_open');if(c)c.onchange=()=>{l.open=c.checked;save();render();sum()};
+ const fd=$('#f_del');if(fd)fd.onclick=()=>{if(l)S.L=S.L.filter(x=>x!==l);else S.T=S.T.filter(x=>x!==t);sel=selT=null;save();render();panel()};
+ sum()}
+let PD={};try{PD=JSON.parse(localStorage.getItem('irrPalm'))||{}}catch(e){}
+const savePD=()=>{try{localStorage.setItem('irrPalm',JSON.stringify(PD))}catch(e){}if(window.FB)window.FB.push('palms',PD)};
+const VARS=['خلاص','خنيزي','شيشي','برحي','لولو','بومعان','فرض','نغال','سكري','مجدول','ربيعة'],QUAL=['جيد','متوسط','ضعيف'];
+let colorMode='s';
+const QCOL={'جيد':0x22b04a,'متوسط':0xe6b422,'ضعيف':0xd9534f};
+function pkey(l,num){const s=numStart()[l.id];return l.id+':'+(s==null?num:num-s)}
+function gpEd(o){const pl=o.pl;return palmEd(gpl(pl),o.num,'',0).replace(/<p class="mut"[^]*?<\/p>/,`<p class="mut" style="margin:4px 0 8px">${pl.name} · الصف ${o.r} من ${pl.rows} · النخلة ${o.c} من ${pl.cols} في الصف · من أصل ${pl.rows*pl.cols} نخلة</p>`).replace('كل نخيل الخط','كل نخيل القسيمة')}
+function palmEd(l,num,side,j){const d=PD[pkey(l,num)]||{},i=S.L.indexOf(l);
+ return `<b>نخلة رقم ${num}</b><p class="mut" style="margin:4px 0 8px">${l.plot?pnm(l.plot)+' · ':''}${esc(l.name)} · المحبس ${vlab(l,i)} · جهة ${side} · النخلة ${j} من ${l.k==='row'?l.n:l.side}</p>
+ <label>الصنف<input type="text" id="pd_v" list="vars" value="${esc(d.v||'')}" placeholder="اكتب الصنف أو اختر"></label><datalist id="vars">${VARS.map(v=>`<option value="${v}">`).join('')}</datalist>
+ <label>الإنتاج</label><div class="bar" id="pd_q">${QUAL.map(q=>`<button data-q="${q}" class="${d.q===q?'on':''}">${q}</button>`).join('')}</div>
+ <label>ملاحظة<input type="text" id="pd_n" value="${esc(d.n||'')}"></label>
+ <div class="bar"><button id="pd_all">تطبيق الصنف على كل نخيل الخط</button></div>`}
+function bindPalmEd(root,l,num){const k=pkey(l,num);
+ const put=(f,v)=>{const d=PD[k]||(PD[k]={});if(v)d[f]=v;else delete d[f];if(!Object.keys(d).length)delete PD[k];savePD();sum();if(vw==='d'&&T3&&colorMode==='q'&&f==='q'){const sv0=T3.sel;buildLines3()}};
+ root.querySelector('#pd_v').oninput=e=>put('v',e.target.value.trim());
+ root.querySelector('#pd_n').oninput=e=>put('n',e.target.value);
+ root.querySelectorAll('#pd_q [data-q]').forEach(b=>b.onclick=()=>{const cur=(PD[k]||{}).q;put('q',cur===b.dataset.q?'':b.dataset.q);root.querySelectorAll('#pd_q [data-q]').forEach(x=>x.classList.toggle('on',(PD[k]||{}).q===x.dataset.q))});
+ root.querySelector('#pd_all').onclick=e=>{const v=(PD[k]||{}).v;if(!v){e.target.textContent='اكتب الصنف أول';return}for(let i=1;i<=cnt(l);i++){const kk=l.id+':'+i;(PD[kk]||(PD[kk]={})).v=v}savePD();sum();e.target.textContent='تم ✓ طُبق على '+cnt(l)+' نخلة'}}
+function prodSummary(){const ks=Object.keys(PD);if(!ks.length)return '';const q={},v={};ks.forEach(k=>{const d=PD[k];if(d.q)q[d.q]=(q[d.q]||0)+1;if(d.v)v[d.v]=(v[d.v]||0)+1});
+ const tb=(t,o)=>Object.keys(o).length?`<table style="margin-top:10px"><tr><th>${t}</th><th>العدد</th></tr>`+Object.entries(o).map(([a,b])=>`<tr><td>${esc(a)}</td><td>${b}</td></tr>`).join('')+'</table>':'';
+ return tb('الإنتاج',q)+tb('الصنف',v)}
+const PNAME={14:'القسائم 14–18'},pnm=k=>PNAME[k]||'القسيمة '+k;
+const PORD={1:0,2:1,3:2,4:3,5:4,6:5,7:6,8:7,9:8,10:9,11:10,12:11,13:12,14:13,15:14,16:15,17:16,18:17,19:18,20:19,21:20,22:21,23:22,24:23,25:24,26:25,27:26,28:27,29:28,30:29,31:30,32:31,33:32,34:33,35:34,36:35,37:8,38:7.5};
+function numStart(){const L=S.L.map((l,i)=>[l,i]).sort((a,b)=>((PORD[a[0].plot]??99)-(PORD[b[0].plot]??99))||a[1]-b[1]);const st={};let n=0;L.forEach(([l])=>{st[l.id]=n;n+=cnt(l)});return st}
+function grpTable(){const st=numStart(),gs={};S.L.forEach(l=>{if(!l.plot)return;const k=l.plot,a=st[l.id]+1,b=st[l.id]+cnt(l),g=gs[k]||(gs[k]={a:1e9,b:0,c:0,n:0});g.a=Math.min(g.a,a);g.b=Math.max(g.b,b);g.c+=cnt(l);g.n++});
+ PONLY.forEach(pl=>{const N=pl.rows*pl.cols;gs[pl.n]={a:1,b:N,c:N,n:'—'}});
+ const ks=Object.keys(gs).sort((x,y)=>(PORD[x]??99)-(PORD[y]??99));
+ return ks.length?'<table style="margin-top:10px"><tr><th>المجموعة</th><th>الترقيم</th><th>النخيل</th><th>خطوط</th></tr>'+ks.map(k=>`<tr><td>${pnm(k)}</td><td>${gs[k].a}–${gs[k].b}</td><td>${gs[k].c}</td><td>${gs[k].n}</td></tr>`).join('')+'</table>':''}
+function sum(){
+ const op=S.L.filter(l=>l.open),tot=S.L.reduce((a,l)=>a+cnt(l),0)+GP.length,on=op.reduce((a,l)=>a+cnt(l),0);
+ $('#sm').innerHTML=`<div class="stats"><div><b>${S.L.length}</b><span>خط</span></div><div><b>${op.length}</b><span>مفتوح</span></div><div><b>${tot}</b><span>نخلة</span></div><div><b>${on}</b><span>تُسقى الحين</span></div></div>`+
+ (S.T.length?'<div style="margin-top:8px">'+S.T.map(t=>`<div class="row"><span class="n">${esc(t.name)}</span><small>${t.cap?t.cap+' م³':''} ${esc(t.note)}</small></div>`).join('')+'</div>':'')+grpTable()+prodSummary();
+ const st=numStart();
+ $('#ls').innerHTML=S.L.map((l,i)=>{const a=st[l.id]+1,n=st[l.id]+cnt(l);return `<div class="row"><span class="n">${vlab(l,i)} · ${esc(l.name)} <small>· نخيل ${a}–${n}</small></span><button class="sw ${l.open?'o':'c'}" data-s="${l.id}">${l.open?'مفتوح':'مقفل'}</button></div>`}).join('');
+ document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const l=S.L.find(x=>x.id===b.dataset.s);l.open=!l.open;save();render();panel()})}
+/* ===== المخطط ===== */
+const ori=l=>{const a=l.pts[0],b=l.pts[l.pts.length-1];return Math.abs(b[1]-a[1])>=Math.abs(b[0]-a[0])?'v':'h'};
+function drawSch(){
+ const SPV=34,SPH=30,UW=84,UH=104,idx={};let n=0;
+ const st0=numStart();S.L.forEach((l,i)=>{idx[l.id]={i:i+1,s:st0[l.id]}});
+ const Vs=S.L.filter(l=>ori(l)==='v'&&l.k!=='row'),Hs=S.L.filter(l=>ori(l)==='h'&&l.k!=='row'),Rs=S.L.filter(l=>l.k==='row');
+ let h='<defs><g id="pm"><path d="M12 23 Q13.5 16 12 10" stroke="#8a5a2b" stroke-width="2.6" fill="none" stroke-linecap="round"/><g stroke="#2f7d4f" stroke-width="1.9" fill="none" stroke-linecap="round"><path d="M12 10 Q6 4.5 1.5 9.5"/><path d="M12 10 Q18 4.5 22.5 9.5"/><path d="M12 10 Q8 3 4.5 1.5"/><path d="M12 10 Q16 3 19.5 1.5"/><path d="M12 10 Q12 4 12 0.8"/></g><circle cx="10.3" cy="11.8" r="1.2" fill="#b5651d"/><circle cx="13.7" cy="11.8" r="1.2" fill="#b5651d"/></g></defs>';
+ const palm=(x,y,num,l,side,j)=>`<g class="pm" data-p="${l.id}|${side}|${j}|${num}" opacity="${l.open?1:.4}"><use href="#pm" x="${x-12}" y="${y}"/><text x="${x}" y="${y+32}" class="pn">${num}</text></g>`;
+ const valve=(x,y,l)=>`<g class="vv" data-v="${l.id}"><circle cx="${x}" cy="${y}" r="15" fill="${l.open?'#2f9e5b':'#d64545'}" stroke="#fff" stroke-width="2"/><text x="${x}" y="${y+4}" class="vn"${vlab(l,idx[l.id].i-1).length>3?' style="font-size:8px"':''}>${vlab(l,idx[l.id].i-1)}</text></g>`;
+ const pipe=(d,l)=>`<path d="${d}" stroke="${l.open?'#1f8fe0':'#d64545'}" stroke-width="4" fill="none" ${l.open?'':'stroke-dasharray="8 6"'}/>`;
+ const grps=[];Vs.forEach((l,i)=>{const key=l.grp||('g'+Math.floor(i/3));let g=grps.find(x=>x.k===key);if(!g){g={k:key,a:[]};grps.push(g)}g.a.push(l)});
+ const pOff={2:0,3:3*UW+30,14:5*UW+60},yAcc={};let vmaxX=0;
+ for(const gr of grps){const ch=gr.a,pl=ch[0].plot||0,ox=pOff[pl]||0,ms=Math.max(...ch.map(l=>l.side)),y=yAcc[pl]||0;
+  ch.forEach((l,k)=>{const cx=ox+k*UW+UW/2,c=idx[l.id],t=y+56;
+   h+=`<text x="${cx}" y="${y+10}" class="ln0">${esc(l.name)}</text>`+pipe(`M${cx} ${y+46}V${t+l.side*SPV}`,l);
+   for(let j=0;j<l.side;j++)h+=palm(cx+24,t+j*SPV,c.s+1+j,l,'يمين',j+1)+palm(cx-24,t+j*SPV,c.s+l.side+1+j,l,'يسار',j+1);
+   h+=valve(cx,y+32,l)});
+  yAcc[pl]=y+66+ms*SPV+26;vmaxX=Math.max(vmaxX,ox+ch.length*UW)}
+ let y=Math.max(0,...Object.values(yAcc));
+ const G=34,gx=vmaxX+70,msH=Math.max(7,...Hs.map(l=>l.side)),uw=70+msH*SPH+G+10;let hy=0;
+ const hinfo=l=>{const a=l.pts[0],b=l.pts[l.pts.length-1],lo=Math.min(a[0],b[0]),hi=Math.max(a[0],b[0]),t=(l.vx-lo)/((hi-lo)||1);return t>.8?'r':Math.abs(t-.5)<.2?'m':'l'};
+ for(let i=0;i<Hs.length;i+=2){Hs.slice(i,i+2).forEach((l,k)=>{const x0=gx+k*(uw+24),cy=hy+52,c=idx[l.id],ty=hinfo(l),mid=ty==='m',rt=ty==='r',hf=l.hf??Math.floor(l.side/2),hd=(mid||rt)?10:60,vx=mid?x0+hd+hf*SPH+G/2:rt?x0+10+l.side*SPH+26:x0+26;
+   h+=`<text x="${vx}" y="${cy-24}" class="ln0">${esc(l.name)}</text>`+pipe(mid?`M${x0+hd} ${cy}H${x0+hd+l.side*SPH+G}`:rt?`M${x0+10} ${cy}H${x0+10+l.side*SPH+10}`:`M${x0+41} ${cy}H${x0+60+l.side*SPH}`,l);
+   for(let j=0;j<l.side;j++){const px=x0+hd+j*SPH+15+(mid&&j>=hf?G:0);h+=palm(px,cy-46,c.s+1+j,l,'فوق',j+1)+palm(px,cy+10,c.s+l.side+1+j,l,'تحت',j+1)}
+   h+=valve(vx,cy,l)});hy+=UH+12}
+ let rmax=0,rh=0;
+ {const RU=52,RPC=25,hf0=14,mn=Math.max(14,...Rs.map(l=>l.n)),ruw=10+mn*SPH+G+40;
+  Rs.forEach((l,i)=>{const col=Math.floor(i/RPC),rr=i%RPC,x0=gx+col*ruw,py=rr*RU+4,cy=py+40,hf=Math.floor(l.n/2);
+   h+=pipe(`M${x0+10} ${cy}H${x0+10+l.n*SPH+G}`,l);
+   for(let j=0;j<l.n;j++){const px=x0+10+j*SPH+15+(j>=hf?G:0);h+=palm(px,py,j+1,l,j<hf?'يسار':'يمين',j+1)}
+   h+=valve(x0+10+hf*SPH+G/2,cy,l);rmax=Math.max(rmax,x0+ruw);rh=Math.max(rh,(rr+1)*RU+8)})}
+ y=Math.max(y,hy,rh)+10;
+ S.T.forEach((t,i)=>{const x=i*190+10;h+=`<rect x="${x}" y="${y}" width="56" height="44" rx="8" fill="#1aa6b7" stroke="#fff" stroke-width="2"/><text x="${x+28}" y="${y+29}" style="font-size:20px;text-anchor:middle">💧</text><text x="${x+64}" y="${y+18}" class="tt" style="font-weight:700">${esc(t.name)}${t.cap?' · '+t.cap+' م³':''}</text><text x="${x+64}" y="${y+34}" class="tt" style="font-size:9px;fill:var(--mu)">${esc(t.note)}</text>`});
+ const W=Math.max(gx+2*uw+34,rmax,S.T.length*190+20),H=y+70;sW=W;
+ sch.setAttribute('viewBox',`-10 -6 ${W+20} ${H+6}`);if(!zs)zs=W*.85;sch.style.width=zs+'px';sch.innerHTML=h}
+sch.addEventListener('click',ev=>{
+ const v=ev.target.closest('[data-v]'),p=ev.target.closest('[data-p]');
+ if(v){const l=S.L.find(x=>x.id===v.dataset.v);l.open=!l.open;save();render();panel();return}
+ if(p){const[id,side,j,num]=p.dataset.p.split('|'),l=S.L.find(x=>x.id===id),el=$('#pinfo');el.innerHTML=palmEd(l,+num,side,j);bindPalmEd(el,l,+num)}});
+$('#v0').onclick=()=>view('d');$('#v1').onclick=()=>view('m');$('#v2').onclick=()=>view('s');
+document.querySelectorAll('#tb [data-t]').forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+$('#pic').onclick=()=>{const b=$('#pdots'),h=b.style.display==='none';b.style.display=h?'':'none';$('#pic').classList.toggle('on',h)};
+$('#zi').onclick=()=>{if(vw==='d'&&T3){T3.rad=Math.max(40,T3.rad/1.3);cam3()}else if(vw==='s'){zs=Math.min(zs*1.35,sW*4);sch.style.width=zs+'px'}else{zw=Math.min(zw*1.4,6000);sv.style.width=zw+'px';render()}};
+$('#zo').onclick=()=>{if(vw==='d'&&T3){T3.rad=Math.min(2400,T3.rad*1.3);cam3()}else if(vw==='s'){zs=Math.max(zs/1.35,300);sch.style.width=zs+'px'}else{zw=Math.max(zw/1.4,300);sv.style.width=zw+'px';render()}};
+$('#ao').onclick=()=>{S.L.forEach(l=>l.open=true);save();render();panel()};
+$('#ac2').onclick=()=>{S.L.forEach(l=>l.open=false);save();render();panel()};
+$('#rs').onclick=()=>{if(confirm('ترجع الخطوط والخزان للوضع الأصلي؟')){S=defaults();sel=selT=null;save();render();panel()}};
+const PTS=[31,610,41,610,31,621.4,41,621.4,31,632.7,41,632.7,31,644,41,644,31,655.4,41,655.4,31,666.8,41,666.8,31,678.1,41,678.1,31,689.5,41,689.5,31,700.8,41,700.8,31,712.1,41,712.1,31,723.5,41,723.5,31,734.9,41,734.9,31,746.2,41,746.2,31,757.5,41,757.5,31,768.9,41,768.9,31,780.2,41,780.2,31,791.6,41,791.6,31,803,41,803,42,29.6,33,36,42,36,33,43.7,42,46.5,42,58,32,58,42,70,32,70,42,81,33,86.8,42,93,33,98.8,42,104,33,120.8,42,120.6,33,133.8,42,139,33,144.8,42,150,33,161,42,161,33,168.8,42,174,33,184,42,189.6,33,207,42,207,33,218,42,218,42,224.6,33,230,33,240,42,240,33,252,42,252,33,263,42,263,33,275,42,275,33,286,42,286,33,298,42,298,42,308,33,308,33,321,33,332,42,332,42,343,33,343,42,355,33,355,33,366,42,366,33,378,42,378,33,390,42,390,33,402,42,402,42,413,33,413,33,424,42,424,33,437,42,437,42,447,33,447,42,459,32,459,350.3,459,42,471,32,471,41,482,32,482,41,493,31,493,41,505,31,505,41,517,31,517,41,528,31,528,41,540,31,540,358,540,41,551,31,551,359,546,31,563,30,574,41,574,31,585,41,585,31,593.9,41,593.7,355.1,593.1,348,621,187,621,198,621,208,621,177,621,220,621,248.7,621,256,621,232,621,359,621,177,630,278,630,208,630,220,630,243,630,254,630,266,630,290,630,301,630,232,630,313,630,325,630,336,630,348,630,187,630,198,630,359,630,177,642,208,642,187,642,254,642,266,642,278,642,313,642,324,642,336,642,198,642,220,642,232,642,243,642,290,642,301,642,348,642,359,642,177,654,186,654,197,654,208,654,220,654,243,654,254,654,266,654,324,654,336,654,359,654,231,654,300,654,312,654,348,654,278,654,290,654,177,665,359,660,186,665,197,665,208,665,220,665,290,665,300,665,335,665,231,665,243,665,254,665,348,665,266,665,312,665,324,665,177,677,186,677,197,677,255,677,208,677,220,677,231,677,312,677,324,677,335,677,348,677,243,677,266,677,278,677,290,677,300,677,359,677,197,688,208,688,231,688,186,688,220,688,243,688,255,688,324,688,336,688,348,688,290,688,300,688,312,688,266,688,278,688,243,700,208,700,220,700,197,700,231,700,290,700,336,700,186,700,255,700,348,700,266,700,278,700,301,700,312,700,324,700,186,712,208,712,231,712,243,712,336,712,348,712,220,712,196,712,266,712,278,712,290,712,301,712,255,712,324,712,312,712,359,712,186,723,208,723,220,723,231,723,243,723,336,723,196,723,278,723,290,723,301,723,312,723,324,723,348,723,255,723,266,723,359,723,186,735,196,735,208,735,220,735,243,735,231,735,348,735,254,735,266,735,336,735,278,735,290,735,301,735,312,735,324,735,359,735,186,746,196,746,208,746,336,746,359,746,219,746,231,746,243,746,254,746,266,746,290,746,301,746,324,746,278,746,312,746,348,746,186,757,196,757,208,757,243,757,254,757,324,757,335,757,220,757,231,757,290,757,301,757,278,757,348,757,266,757,312,757,359,757,185,769,196,769,208,769,220,769,335,769,359,769,231,769,242,769,290,769,324,769,348,769,266,769,278,769,312,769,254,769,301,769,185,779,196,779,208,779,220,779,231,779,242,779,254,779,266,779,290,779,278,779,301,779,312,779,336,779,348,779,324,779,359,785.1,185,792,196,792,219,792,266,792,208,792,242,792,301,792,231,792,254,792,278,792,312,792,324,792,335,792,348,792,289,792,359,792,185,804,208,804,196,804,219,804,266,804,278,804,289,804,348,804,231,804,254,804,312,804,324,804,336,804,31,815,242,804,301,804,41,815,185,815,278,815,219,815,231,815,266,815,290,815,196,815,208,815,242,815,254,815,41,827,186,827,196,827,208,827,219,827,290,827,254,827,266,827,365,827,230,827,242,827,278,827,185,839,318.2,839,219,839,266,839,278,839,290,839,196,839,242,839,254,839,207,839,230,839,301,839,31,850,41,850,335,839,185,850,207,850,219,850,254,850,196,850,266,850,278,850,41,856.8,242,850,31,862,290,850,185,862,196,862,208,862,219,862,230,862,242,862,41,871,31,871,297.8,862,290,871,219,871,311,871,324,871,335,871,183,871,196,871,207,871,348,871,230,871,41,879.8,242,871,31,885,277,877.8,290,877.6,312,880.1,183,885,334,885,196,885,324,885,348,885,207,885,219,885,230,885,242,885,41,893,31,893,290,893,365.3,893,230,893,323,893,311,893,334,893,190.4,893,347,893,359,893,41,904.8,31,910,183,910,196,910,230,910,334,910,219,910,347,910,207,910,41,915.8,265,910,323,910,31,917,254,910,311,910,359,916.1,196,922,311,922,183,922,207,922,230,922,218,922,334,922,347,922,41,922,242,922,254,922,31,932,323,922,241,932,196,932,183,932,207,932,218,932,41,938.8,230,932,31,940,365.3,932,323,936.9,196,945,183,945,207,945,218,945,230,945,31,950,41,945,254,945,264,945,311,945,323,945,359,945,334,945,287,945,346,945,195,955,206,955,359,955,218,955,230,955,183,955,264,955,277,955,287,955,41,960.8,31,962,311,955,323,955,334,955,183,967,206,967,218,967,230,967,195,967,241,967,31,974,41,973.8,282,967,294,967,304,967,323,967,311,967,334,967,346,967,195,979,206,979,183,979,218,979,230,979,241,979,253,979,346,979,41,984.8,264,979,276,979,288,979,299,979,311,979,334,979,31,991,359,979,323,979,195,991,206,991,218,991,253,991,183,991,230,991,241,991,264,991,323,991,276,991,288,991,299,991,311,991,41,1001,334,991,346,991,31,1001,206,1001,195,1001,183,1001,218,1001,264,1001,276,1001,288,1001,299,1001,334,1001,230,1001,241,1001,253,1001,323,1001,347,1001,359,1001,31,1013,40,1013,311,1001,183,1013,195,1013,206,1013,218,1013,230,1013,241,1013,254,1013,264,1013,323,1013,359,1013,287,1013,299,1013,311,1013,334,1013,347,1013,40,1024,31,1024,276,1017.9,183,1024,230,1024,195,1024,206,1024,254,1024,264,1024,287,1024,359,1024,218,1024,241,1024,276,1024,323,1024,40,1037,299,1024,334,1024,347,1024,31,1037,311,1024,183,1037,195,1037,206,1037,230,1037,277,1037,359,1037,218,1037,241,1037,254,1037,264,1037,299,1037,323,1037,334,1037,288,1037,311,1037,346,1037,40,1048,184,1048,195,1048,206,1048,230,1048,277,1048,218,1048,254,1048,299,1048,264,1048,359,1048,241,1048,288,1048,311,1048,323,1048,334,1048,346,1048,30,1059,40,1059,184,1059,206,1059,299,1059,195,1059,264,1059,276,1059,218,1059,230,1059,241,1059,254,1059,359,1059,288,1059,311,1059,322,1059,334,1059,346,1059,40,1071,54,1071,66,1071,89,1071,77,1071,105,1071,117,1071,128,1071,162,1071,151,1071,174,1071,139,1071,288,1071,184,1071,195,1071,206,1071,254,1071,264,1071,276,1071,218,1071,230,1071,241,1071,105,1077.6,299,1071,311,1071,323,1071,346,1071,334,1071,359,1071,30,1083,40,1083,54,1083,66,1083,89,1083,139,1083,77,1083,288,1083,117,1083,128,1083,150,1083,162,1083,174,1083,184,1083,195,1083,218,1083,230,1083,276,1083,346,1083,206,1083,241,1083,254,1083,359,1083,264,1083,334,1083,299,1083,311,1083,323,1083,40,1096,66,1096,77,1096,89,1096,105,1096,117,1096,150,1096,162,1096,174,1096,254,1096,128,1096,139,1096,184,1096,195,1096,218,1096,206,1096,241,1096,264,1096,230,1096,288,1096,334,1096,346,1096,277,1096,300,1096,311,1096,322,1096,359,1096,30,1105,40,1105,77,1105,66,1105,89,1105,54,1105,105,1105,117,1105,128,1105,140,1105,162,1105,254,1105,150,1105,174,1105,277,1105,195,1105,241,1105,184,1105,206,1105,218,1105,264,1105,300,1105,346,1105,359,1105,230,1105,288,1105,322,1105,311,1105,334,1105,40,1117,30,1117,77,1117,54,1117,66,1117,105,1117,117,1117,128,1117,140,1117,150,1117,162,1117,89,1117,174,1117,184,1117,241,1117,195,1117,206,1117,218,1117,230,1117,288,1117,322,1117,346,1117,264,1117,277,1117,299,1117,311,1117,30,1129,40,1129,335,1117,358,1117,128,1129,54,1129,66,1129,77,1129,89,1129,105,1129,140,1129,150,1129,162,1129,288,1129,117,1129,195,1129,277,1129,184,1129,206,1129,322,1129,174,1129,254,1129,218,1129,230,1129,242,1129,265,1129,300,1129,335,1129,346,1129,358,1129,311,1129,40,1141,30,1141,117,1141,54,1141,66,1141,77,1141,89,1141,140,1141,105,1141,150,1141,162,1141,128,1141,195,1141,174,1141,184,1141,206,1141,230,1141,242,1141,288,1141,218,1141,254,1141,265,1141,277,1141,300,1141,311,1141,322,1141,335,1141,358,1141,40,1151,30,1151,66,1151,77,1151,89,1151,140,1151,150,1151,105,1151,128,1151,162,1151,174,1151,54,1151,117,1151,254,1151,206,1151,184,1151,265,1151,242,1151,195,1151,218,1151,335,1151,230,1151,277,1151,289,1151,300,1151,358,1151,311,1151,323,1151,346,1151,30,1164,40,1164,105,1164,54,1164,66,1164,89,1164,128,1164,150,1164,77,1164,174,1164,117,1164,140,1164,162,1164,218,1164,184,1164,195,1164,242,1164,311,1164,206,1164,230,1164,254,1164,266,1164,300,1164,30,1175,289,1164,323,1164,346,1164,358,1164,40,1175,54,1175,66,1175,77,1175,128,1175,140,1175,174,1175,89,1175,105,1175,117,1175,184,1175,195,1175,150,1175,162,1175,266,1175,206,1175,230,1175,254,1175,277,1175,289,1175,300,1175,218,1175,323,1175,346,1175,311,1175,358,1175,242,1181.7,266,1182.2,289,1181.7,99.5,1188.6,40,1195,54,1195,77,1195,66,1195,90,1195,140,1195,150,1195,105,1195,117,1195,128,1195,174,1195,162,1195,184,1195,195,1195,208,1195,218,1195,230,1195,243,1195,254,1195,266,1195,277,1195,289,1195,300,1195,311,1195,346,1195,40,1202.9,323,1195,335,1195,358,1195,30,1208,54,1208,66,1208,77,1208,89,1208,128,1208,105,1208,117,1208,140,1208,151,1208,162,1208,174,1208,185,1208,196,1208,208,1208,218,1208,231,1208,254,1208,266,1208,277,1208,289,1208,40,1213.9,242,1208,323,1208,30,1219,300,1208,311,1208,358,1208,54,1219,66,1219,335,1208,346,1208,77,1219,89,1219,105,1219,117,1219,128,1219,140,1219,150,1219,162,1219,174,1219,185,1219,196,1219,219,1219,231,1219,208,1219,242,1219,254,1219,266,1219,289,1219,277,1219,40,1225.9,300,1219,311,1219,323,1219,335,1219,346,1219,358,1219,30,1231,54,1231,66,1231,77,1231,128,1231,140,1231,90,1231,105,1231,117,1231,150,1231,174,1231,185,1231,208,1231,162,1231,196,1231,219,1231,231,1231,242,1231,254,1231,266,1231,323,1231,40,1236.8,277,1231,289,1231,300,1231,311,1231,335,1231,30,1242,346,1231,358,1231,66,1242,55,1242,77,1242,90,1242,105,1242,117,1242,128,1242,185,1242,140,1242,151,1242,162,1242,174,1242,196,1242,208,1242,219,1242,242,1242,231,1242,266,1242,277,1242,346,1242,254,1242,289,1242,301,1242,30,1249.1,40,1248.9,312,1242,324,1242,335,1242,359,1242,66,1254,54,1254,77,1254,89,1254,105,1254,128,1254,174,1254,140,1254,117,1254,151,1254,197,1254,45,1254,162,1254,185,1254,209,1254,219,1254,231,1254,242,1254,266,1254,277,1254,289,1254,312,1254,30,1260.1,254,1254,324,1254,347,1254,40,1265,301,1254,335,1254,54,1265,66,1265,77,1265,359,1254,89,1265,163,1265,105,1265,117,1265,128,1265,140,1265,174,1265,151,1265,185,1265,198,1265,209,1265,219,1265,231,1265,242,1265,300,1265,254,1265,266,1265,312,1265,277,1265,289,1265,324,1265,40,1271.9,335,1265,347,1265,359,1265,55,1277,66,1277,77,1277,90,1277,105,1277,117,1277,174,1277,128,1277,140,1277,151,1277,163,1277,185,1277,198,1277,220,1277,242,1277,209,1277,231,1277,254,1277,266,1277,277,1277,301,1277,324,1277,335,1277,347,1277,30,1284.1,40,1283.9,289,1277,312,1277,359,1277,55,1289,90,1289,77,1289,105,1289,117,1289,140,1289,163,1289,66,1289,174,1289,128,1289,151,1289,209,1289,186,1289,198,1289,231,1289,242,1289,220,1289,266,1289,277,1289,289,1289,254,1289,301,1289,324,1289,335,1289,312,1289,347,1289,359,1289,38,1299,55,1299,77,1299,90,1299,105,1299,66,1299,163,1299,117,1299,128,1299,140,1299,151,1299,174,1299,221,1299,186,1299,198,1299,209,1299,242,1299,231,1299,254,1299,277,1299,266,1299,289,1299,301,1299,324,1299,38,1311,335,1299,347,1299,359,1299,90,1311,312,1299,77,1311,128,1311,66,1311,106,1311,151,1311,163,1311,117,1311,140,1311,174,1311,198,1311,186,1311,221,1311,209,1311,231,1311,242,1311,254,1311,266,1311,278,1311,289,1311,301,1311,324,1311,335,1311,347,1311,38,1318.9,54,1318.6,312,1311,359,1311,77,1324,117,1324,140,1324,163,1324,66,1324,90,1324,106,1324,174,1324,186,1324,151,1324,198,1324,128,1324,232,1324,244,1324,209,1324,221,1324,255,1324,266,1324,289,1324,38,1329.9,301,1324,312,1324,335,1324,347,1324,324,1324,359,1324,54,1331.6,278,1324,66,1332.3,106,1331.5,117,1332.2,128,1332,77,1338,90,1338,141,1332.8,152,1332.5,163,1338,174,1338,38,1338,186,1338,198,1338,209,1338,221,1338,266,1338,232,1338,255,1338,54,1343.6,244,1338,278,1338,289,1338,301,1338,324,1338,335,1338,66,1344.3,106,1343.5,90,1344.9,117,1344.3,152,1343.6,312,1338,348,1338,359,1338,129,1345,175,1350,186,1350,198,1350,38,1350,221,1350,244,1350,209,1350,232,1350,255,1350,278,1350,55,1355.6,66,1355.3,163,1350,266,1350,301,1350,312,1350,77,1356.1,90,1355.9,106,1355.5,117,1355.3,141,1350,152,1350,289,1350,348,1350,324,1350,335,1350,359,1350,175,1362,38,1362,186,1362,198,1362,209,1362,221,1362,244,1362,129,1362,153,1362,232,1362,255,1362,266,1362,289,1362,54,1367.6,66,1367.3,77,1367.1,106,1362,117,1362,141,1362,164,1362,278,1362,301,1362,312,1362,324,1362,359,1362,90,1367.9,348,1362,336,1362,175,1373,186,1373,221,1373,38,1373,198,1373,209,1373,232,1373,255,1373,106,1373,244,1373,266,1373,324,1373,66,1378.4,129,1373,141,1373,289,1373,301,1373,312,1373,77,1379.1,90,1378.8,117,1378.3,153,1373,164,1373,278,1373,336,1373,348,1373,359,1373,175,1387,186,1387,38,1387,198,1387,209,1387,232,1387,221,1387,255,1387,117,1387,278,1387,54,1387,66,1387,77,1387,244,1387,90,1387,106,1387,129,1387,141,1387,164,1387,289,1387,312,1387,153,1387,266,1387,301,1387,348,1387,360,1387,324,1387,336,1387,175,1396,186,1396,198,1396,38,1396,209,1396,221,1396,232,1396,77,1396,244,1396,256,1396,266,1396,279,1396,54,1401.6,90,1400.8,129,1396,301,1396,66,1402.3,106,1401.5,118,1401.3,141,1396,153,1396,164,1396,324,1396,336,1396,289,1396,312,1396,348,1396,360,1396,175,1408,186,1408,198,1408,210,1408,222,1408,244,1408,256,1408,38,1413,232,1408,266,1408,312,1408,279,1408,290,1408,301,1408,324,1408,336,1408,348,1408,360,1408,38,1424,66,1424,55,1424,77,1424,90,1424,118,1424,106,1424,129,1424,164,1424,141,1424,153,1424,175,1424,186,1424,198,1424,222,1424,232,1424,244,1424,301,1424,256,1424,290,1424,210,1424,312,1424,66,1433,46.6,1433,55,1433,118,1433,129,1433,348,1424,360,1424,90,1433,100.6,1433,175,1433,278,1433,324,1424,221,1433,232,1433,198,1433,267,1433,244,1433,301,1433,312,1433,290,1433,360,1433,384.5,610,383.8,622,382,633,383.4,659,383,669,383,681,381.1,739,382.6,756.6,383.1,784,368,925,368,948,813.5,937,369,972,369,983,369,995,369,1002,369,1013,369,1025,370,1044.9,388.8,1056.5,370,1062,455.9,1062,406,1062,466.9,1062,394,1062,415,1062,499,1062,428,1062,485,1062,543,1062,440,1062,510,1062,473,1062,521,1062,556,1062,579,1062,533,1062,567,1062,590,1062,370,1072,394,1072,406,1072,440,1072,451,1072,479.1,1072,417,1072,428,1072,499,1072,462,1072,521,1072,579,1072,511,1072,534,1072,544,1072,556,1072,567,1072,590,1072,394,1084,370,1084,406,1084,463,1084,490.4,1084,473,1084,428,1084,440,1084,451,1084,511,1084,521,1084,534,1084,499,1084,556,1084,579,1084,590,1084,567,1084,545,1084,440,1096,451,1091.1,463,1096,479.6,1096,370,1096,418,1096,511,1096,394,1096,406,1096,428,1096,486,1096,545,1096,499,1096,521,1096,534,1096,590,1096,556,1096,567,1096,579,1096,445.8,1101.3,370,1107,463,1107,525.8,1107,418,1107,428,1107,406,1107,590,1107,451,1107,474,1107,487,1107,499,1107,534,1107,579,1107,511,1107,545,1107,556,1107,567,1107,463,1118,418,1118,440,1118,370,1118,406,1118,429,1118,544,1118,452,1118,474,1118,488,1118,522,1118,499,1118,511,1118,534,1118,567,1118,580,1118,591,1118,556,1118,429,1129,370,1129,394,1129,406,1129,418,1129,440,1129,452,1129,463,1129,511,1129,476,1129,499,1129,556,1129,522,1129,534,1129,545,1129,487,1129,568,1129,580,1129,591,1129,440,1141,370,1141,394,1141,418,1141,429,1141,487,1141,499,1141,511,1141,522,1141,452,1141,465,1141,476,1141,534,1141,545,1141,556,1141,580,1141,568,1141,591,1141,394,1153,370,1153,406,1153,556,1153,418,1153,429,1153,441,1153,452,1153,465,1153,522,1153,534,1153,487,1153,499,1153,510,1153,545,1153,580,1153,591,1153,370,1164,394,1164,406,1164,441,1164,465,1164,534,1164,418,1164,429,1164,476,1164,487,1164,499,1164,452,1164,510,1164,522,1164,545,1164,556,1164,568,1164,580,1164,591,1164,370,1174,406,1174,429,1174,394,1174,418,1174,441,1174,463,1174,476,1174,452,1174,487,1174,499,1174,510,1174,545,1174,522,1174,533,1174,556,1174,568,1174,580,1174,394,1185,591,1174,406,1185,441,1185,465,1185,418,1185,429,1185,453,1185,476,1185,488,1185,510,1185,522,1185,533,1185,499,1185,556,1185,568,1185,580,1185,545,1185,591,1185,370,1197,394,1197,406,1197,429,1197,441,1197,453,1197,465,1197,418,1197,476,1197,510,1197,522,1197,556,1197,487,1197,499,1197,533,1197,545,1197,568,1197,580,1197,591,1197,370,1209,394,1209,406,1209,418,1209,429,1209,441,1209,499,1209,453,1209,465,1209,476,1209,487,1209,522,1209,533,1209,556,1209,580,1209,510,1209,545,1209,568,1209,591,1209,394,1221,406,1221,370,1221,441,1221,418,1221,429,1221,453,1221,499,1221,465,1221,476,1221,510,1221,487,1221,533,1221,522,1221,568,1221,545,1221,556,1221,580,1221,591,1221,394,1232,370,1232,406,1232,453,1232,465,1232,487,1232,418,1232,429,1232,441,1232,475,1232,499,1232,510,1232,533,1232,545,1232,556,1232,522,1232,568,1232,580,1232,591,1232,370,1243,394,1243,418,1243,429,1243,441,1243,406,1243,475,1243,453,1243,465,1243,487,1243,522,1243,499,1243,510,1243,533,1243,545,1243,568,1243,580,1243,556,1243,591,1243,453,1256,370,1256,394,1256,407,1256,418,1256,441,1256,465,1256,429,1256,475,1256,487,1256,499,1256,820,1249.5,510,1256,522,1256,533,1256,545,1256,568,1256,556,1256,580,1256,591,1256,370,1267,394,1267,418,1267,407,1267,453,1267,465,1267,429,1267,441,1267,487,1267,475,1267,499,1267,510,1267,545,1267,522,1267,533,1267,568,1267,556,1267,580,1267,592,1267,370,1279,394,1279,407,1279,418,1279,429,1279,441,1279,465,1279,454,1279,475,1279,499,1279,487,1279,510,1279,522,1279,533,1279,556,1279,568,1279,580,1279,545,1279,592,1279,370,1290,394,1290,407,1290,430,1290,418,1290,442,1290,466,1290,499,1290,454,1290,475,1290,487,1290,556,1290,510,1290,533,1290,522,1290,545,1290,568,1290,592,1290,580,1290,370,1301,407,1301,533,1301,394,1301,418,1301,466,1301,430,1301,442,1301,454,1301,475,1301,487,1301,499,1301,510,1301,522,1301,545,1301,568,1301,580,1301,556,1301,592,1301,370,1313,394,1313,421,1313,430,1313,442,1313,407,1313,454,1313,475,1313,487,1313,466,1313,533,1313,499,1313,510,1313,522,1313,556,1313,568,1313,580,1313,592,1313,546,1313,394,1326,370,1326,475,1326,488,1326,421,1326,430,1326,442,1326,454,1326,407,1326,466,1326,510,1326,499,1326,522,1326,546,1326,568,1326,533,1326,556,1326,580,1326,592,1326,396,1341,407,1341,370,1341,475,1341,421,1341,430,1341,442,1341,454,1341,488,1341,499,1341,466,1341,522,1341,533,1341,546,1341,557,1341,568,1341,510,1341,580,1341,592,1341,396,1352,370,1352,407,1352,421,1352,442,1352,476,1352,430,1352,454,1352,466,1352,515,1352,488,1352,499,1352,522,1352,568,1352,546,1352,534,1352,557,1352,580,1352,592,1352,408,1364,816.1,1352,370,1364,431,1364,396,1364,421,1364,454,1364,500,1364,442,1364,466,1364,490,1364,521,1364,475,1364,510,1364,533,1364,546,1364,557,1364,569,1364,580,1364,592,1364,430,1375,396,1375,370,1375,408,1375,421,1375,442,1375,454,1375,522,1375,557,1375,466,1375,475,1375,490,1375,499,1375,580,1375,510,1375,533,1375,546,1375,568,1375,592,1375,396,1388,408,1388,421,1388,370,1388,431,1388,466,1388,490,1388,442,1388,510,1388,533,1388,455,1388,475,1388,557,1388,568,1388,580,1388,592,1388,523,1388,546,1388,499,1388,371,1398,396,1398,431,1398,408,1398,421,1398,490,1398,499,1398,442,1398,455,1398,514,1398,533,1398,547,1398,466,1398,475,1398,523,1398,557,1398,592,1398,570,1398,581,1398,408,1410,370,1410,421,1410,396,1410,432,1410,442,1410,512.2,1410,815.2,1398,455,1410,478,1410,501,1410,523,1410,466,1410,535,1410,490,1410,546,1410,570,1410,557,1410,581,1410,592,1410,605,1410,615,1410,639,1410,650,1410,629,1410,673,1410,662,1410,684,1410,718,1410,396,1423,694,1410,706,1410,738,1410,761,1410,750,1410,772,1410,784,1410,797,1410,466,1423,615,1417.8,728,1415.5,421,1423,455,1423,478,1423,524,1423,370,1423,536.5,1423,816.5,1416.6,546,1423,408,1423,581.6,1423,639,1423,439.6,1428.5,684,1423,797,1423,592,1423,729.6,1423,805.6,1423,821.6,1423,455,1431.3,507.7,1430.1,242,1172.8,277,1163,277,1185,254,1117,254,1185,230,850.5,141,1341.4,346,956,346,1140,278,665.5,31,901.5,54,1094,77,1347.1,440,1107,406,1141,476,1152.5,568,1152.5,470.6,1072,417,1084,481.7,1084,639,1062,603,1062,615,1062,626,1062,651,1062,662,1062,708,1062,720,1062,732,1062,778,1062,810,1062,673,1062,743,1062,767,1062,685,1062,697,1062,755,1062,788,1062,603,1072,616,1072,639,1072,797,1072,651,1072,626,1072,662,1072,673,1072,697,1072,708,1072,732,1072,685,1072,720,1072,743,1072,788,1072,809,1072,778,1072,767,1072,616,1084,626,1084,639,1084,603,1084,662,1084,651,1084,673,1084,685,1084,720,1084,732,1084,696,1084,708,1084,743,1084,788,1084,755,1084,778,1084,809,1084,797,1084,767,1090.6,603,1096,614,1096,651,1096,626,1096,639,1096,732,1096,662,1096,673,1096,685,1096,696,1096,708,1096,754,1096,720,1096,743,1096,809,1096,788,1096,797,1096,639,1107,673,1107,767,1107,603,1107,614,1107,651,1107,685,1107,707,1107,732,1107,626,1107,662,1107,696,1107,719,1107,754,1107,778,1107,788,1107,743,1107,797,1107,809,1107,603,1118,614,1118,626,1118,651,1118,673,1118,685,1118,754,1118,638,1118,662,1118,696,1118,707,1118,719,1118,732,1118,809,1118,767,1118,743,1118,775,1118,788,1118,603,1129,614,1129,651,1129,662,1129,673,1129,638,1129,696,1129,626,1129,685,1129,707,1129,718,1129,732,1129,741,1129,788,1129,797,1129,809,1129,753,1129,775,1129,767,1129,626,1141,603,1141,614,1141,651,1141,662,1141,673,1141,685,1141,696,1141,638,1141,718,1141,732,1141,741,1141,707,1141,753,1141,767,1141,809,1141,775,1141,788,1141,797,1141,614,1153,662,1153,603,1153,707,1153,718,1153,732,1153,638,1153,651,1153,674,1153,696,1153,767,1153,779.9,1153,788,1153,797,1153,809,1153,626,1153,684,1153,741,1153,753,1153,626,1164,651,1164,603,1164,614,1164,638,1164,696,1164,662,1164,674,1164,684,1164,707,1164,718,1164,732,1164,741,1164,753,1164,788,1164,809,1164,767.2,1164,777.2,1164,796,1164,614,1174,603,1174,626,1174,638,1174,651,1174,662,1174,696,1174,707,1174,672,1174,683,1174,718,1174,778.3,1174,751,1174,809,1174,740,1174,788,1174,772,1174,796,1174,603,1185,732,1185,614,1185,626,1185,638,1185,651,1185,662,1185,672,1185,683,1185,696,1185,707,1185,718,1185,740,1185,751,1185,761,1185,772,1185,782.7,1185,809,1185,796,1185,638,1197,603,1197,672,1197,696,1197,706,1197,718,1197,626,1197,651,1197,662,1197,684,1197,614,1197,732,1197,739,1197,751,1197,761,1197,772,1197,796,1197,784,1197,809,1197,614,1209,626,1209,651,1209,662,1209,672,1209,706,1209,717,1209,732,1209,739,1209,603,1209,684,1209,696,1209,809,1209,638,1209,751,1209,761,1209,784,1209,772,1209,796,1209,614,1221,651,1221,662,1221,717,1221,626,1221,638,1221,674,1221,683,1221,732,1221,739,1221,751,1221,603,1221,706,1221,694,1221,761,1221,772,1221,784,1221,809,1221,796,1221,626,1232,651,1232,603,1232,614,1232,638,1232,662,1232,673,1232,694,1232,717,1232,683,1232,706,1232,728,1232,739,1232,751,1232,809,1232,761,1232,772,1232,784,1232,796,1232,727,1243,614,1243,638,1243,651,1243,671,1243,603,1243,626,1243,662,1243,683,1243,694,1243,706,1243,717,1243,739,1243,751,1243,761,1243,772,1243,784,1243,795,1243,809,1243,615,1256,662,1256,694,1256,717,1256,739,1256,751,1256,603,1256,626,1256,638,1256,650,1256,672,1256,684,1256,706,1256,728,1256,761,1256,772,1256,784,1256,809,1256,795,1256,615,1267,684,1267,603,1267,650,1267,739,1267,751,1267,761,1267,626,1267,638,1267,662,1267,694,1267,706,1267,717,1267,728,1267,809,1267,772,1267,795,1267,672,1267,626,1279,662,1279,603,1279,615,1279,638,1279,694,1279,717,1279,728,1279,751,1279,809,1279,650,1279,684,1279,706,1279,739,1279,761,1279,772,1279,784,1279,796,1279,603,1290,615,1290,638,1290,662,1290,751,1290,796,1290,626,1290,650,1290,673,1290,706,1290,728,1290,739,1290,684,1290,694,1290,761,1290,772,1290,809,1290,784,1290,615,1301,603,1301,650,1301,662,1301,626,1301,638,1301,673,1301,684,1301,694,1301,718,1301,728,1301,739,1301,751,1301,706,1301,761,1301,772,1301,784,1301,795,1301,809,1301,650,1313,684,1313,615,1313,627,1313,638,1313,662,1313,673,1313,603,1313,694,1313,706,1313,718,1313,728,1313,808,1313,739,1313,751,1313,761,1313,772,1313,784,1313,795,1313,603,1326,672,1326,717,1326,615,1326,627,1326,650,1326,662,1326,684,1326,751,1326,639,1326,706,1326,694,1326,772,1326,728,1326,739,1326,761,1326,795,1326,809,1326,784,1326,717,1332.7,615,1341,627,1341,603,1341,639,1341,650,1341,672,1341,662,1341,684,1341,728,1341,694,1341,706,1341,739,1341,750,1341,761,1341,717,1341,772,1341,784,1341,796,1341,808,1341,627,1352,603,1352,717,1352,615,1352,639,1352,650,1352,694,1352,672,1352,662,1352,684,1352,750,1352,739,1352,772,1352,784,1352,706,1352,728,1352,761,1352,809,1352,796,1352,615,1364,629,1364,603,1364,650,1364,639,1364,662,1364,672,1364,706,1364,694,1364,684,1364,739,1364,717,1364,761,1364,772,1364,784,1364,728,1364,750,1364,796,1364,808,1364,603,1375,629,1375,639,1375,615,1375,650,1375,662,1375,672,1375,706,1375,718,1375,684,1375,694,1375,739,1375,750,1375,784,1375,728,1375,772,1375,795,1375,808,1375,761,1375,605,1388,615,1388,629,1388,639,1388,650,1388,662,1388,673,1388,694,1388,706,1388,728,1388,684,1388,718,1388,738,1388,750,1388,761,1388,784,1388,796,1388,772,1388,809,1388,605,1398,615,1398,629,1398,650,1398,639,1398,662,1398,673,1398,694,1398,772,1398,684,1398,718,1398,727,1398,738,1398,750,1398,761,1398,706,1402.9,784,1398,804.1,1398,796,1398,605,1410,615,1410,639,1410,650,1410,629,1410,673,1410,662,1410,684,1410,718,1410,694,1410,706,1410,738,1410,761,1410,750,1410,772,1410,784,1410,797,1410,615,1417.8,728,1415.5,639,1423,684,1423,797,1423,729.6,1423,805.6,1423,732,1174.5,767,1081.3,755,1073,797,1061,797,1118,784,1267.5,673,1279,717,1290,778,1037,626,1037,639,1037,651,1037,673,1037,685,1037,662,1037,708,1037,720,1037,732,1037,697,1037,810,1037,767,1037,743,1037,673,1050,810,1043.7,615,1050,662,1050,788,1050,651,1050,685,1050,720,1050,603,1050,626,1050,639,1050,708,1050,797,1050,697,1050,732,1050,755,1050,767,1050,743,1050,778,1049.5,755,1037.5,418,1037,429,1037,393,1037,566,1037,451,1037,556,1037,411.5,1037,393,1050,499,1044.2,510,1043.9,485,1050,415,1050,439,1050,405,1050,462,1050,544,1050,579,1050,428,1050,473,1050,521,1050,533,1050,556,1050,566,1050,590,1050,388.8,1056.5,439,1037.5,402.2,1037];
+/* ===== القاعدة الرقمية (بدل الصورة) ===== */
+const BLD=[[379.4, 690.5, 14, 22], [248.0, 858.1, 27, 38], [269.1, 910.7, 27, 32], [354.6, 832.9, 23, 43], [301.9, 813.9, 35, 16], [464.4, 1026.2, 70, 14], [335.7, 41.3, 10, 10], [776.7, 560.0, 26, 18]];
+const FARM=[[[3.2, 28.4], [351.1, 21.1], [380.7, 1432.8], [32.8, 1440.1]], [[377.3, 600.7], [809.2, 591.6], [826.6, 1423.4], [394.7, 1432.5]]],TRACK=[[369.3, 600.8], [386.7, 1432.6]];
+const ROAD=[[352.7, 1.0], [363.7, 525.9], [384.2, 548.5], [818.2, 591.4]];
+function buildBase(){
+ let h='<rect x="-50" y="-50" width="920" height="1560" fill="#e9dcc0"/><path d="'+FARM.map(q=>'M'+q.map(p=>p.join(' ')).join('L')+'Z').join(' ')+'" fill="#dccb9f" stroke="#a58b57" stroke-width="1.2" stroke-dasharray="5 4"/>';
+ h+=`<path d="M${ROAD.map(p=>p.join(' ')).join('L')}" stroke="#8c8c90" stroke-width="12" fill="none" stroke-linejoin="round"/><path d="M${TRACK[0].join(' ')}L${TRACK[1].join(' ')}" stroke="#bdb39a" stroke-width="6"/>`;
+ BLD.forEach(b=>h+=`<rect x="${b[0]}" y="${b[1]}" width="${b[2]}" height="${b[3]}" fill="#f4f1ea" stroke="#8a8578" stroke-width="1"/>`);
+ [{name:'القسيمة 2',x:99,y:47.0,w:71,h:1021.7},{name:'الطرف (صفّين)',x:25.5,y:604,w:21,h:206},{name:'القسيمة 3',x:50,y:47.0,w:47,h:1021.7},{name:'القسائم 14–18',x:50,y:1072,w:117,h:344}].forEach(f=>{h+=`<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" fill="none" stroke="#2f7d4f" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${f.x+f.w/2}" y="${f.y-3}" text-anchor="middle" style="font-size:9px;font-weight:700;fill:#2f7d4f">${f.name}</text>`});
+ let pl2='';PLOTS.forEach(pl=>{if(pl.bb){const b=pl.bb;h+=`<rect x="${b[0]}" y="${b[1]}" width="${b[2]-b[0]}" height="${b[3]-b[1]}" fill="none" stroke="#2f7d4f" stroke-width="1.2" stroke-dasharray="4 3"/>`;pl2+=`<text x="${(b[0]+b[2])/2}" y="${(b[1]+b[3])/2+3}" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#2f7d4f;stroke:#fff;stroke-width:3px;paint-order:stroke">${pl.n}</text>`;return}if(pl.nolines){const py=pl.py||pl.p,yt=pl.y0-py/2;h+=`<rect x="${pl.x0-pl.p/2}" y="${yt}" width="${pl.cols*pl.p}" height="${pl.rows*py}" fill="none" stroke="#2f7d4f" stroke-width="1.2" stroke-dasharray="4 3"/>`;const tx=pl.x0+(pl.cols-1)*pl.p/2,ty=yt+pl.rows*py/2;pl2+=`<text x="${tx}" y="${ty+3}"${pl.cols*pl.p<40&&pl.rows>1?` transform="rotate(-90 ${tx} ${ty})"`:''} text-anchor="middle" style="font-size:10px;font-weight:700;fill:#2f7d4f;stroke:#fff;stroke-width:3px;paint-order:stroke">${pl.rows*pl.cols===1?pl.n:pl.name+' · '+pl.rows+'×'+pl.cols}</text>`;return}h+=`<rect x="${pl.x0-pl.p/2}" y="${pl.y0-(pl.py||pl.p)/2}" width="${pl.cols*pl.p}" height="${pl.rows*(pl.py||pl.p)}" fill="none" stroke="#2f7d4f" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${pl.x0+(pl.cols-1)*pl.p/2}" y="${pl.y0-pl.p-3}" text-anchor="middle" style="font-size:9px;font-weight:700;fill:#2f7d4f">${pl.name}</text>`});
+ h+='<defs><g id="pmk" transform="translate(-4.8 -4.8) scale(.4)"><path d="M12 23 Q13.5 16 12 10" stroke="#8a5a2b" stroke-width="3.6" fill="none" stroke-linecap="round"/><g stroke="#2f8a45" stroke-width="2.7" fill="none" stroke-linecap="round"><path d="M12 10 Q6 4.5 1.5 9.5"/><path d="M12 10 Q18 4.5 22.5 9.5"/><path d="M12 10 Q8 3 4.5 1.5"/><path d="M12 10 Q16 3 19.5 1.5"/><path d="M12 10 Q12 4 12 0.8"/></g></g></defs>';
+ let u='';GP.forEach(q=>{u+=`<use href="#pmk" x="${q.x}" y="${q.y}"/>`});
+ h+=`<g id="pdots">${u}</g>`+pl2;
+ $('#imgs').innerHTML=h}
+/* ===== مجسم 3D ===== */
+let T3=null;
+const SIDEN={v:['يمين','يسار'],h:['فوق','تحت']};
+function dseg(px,py,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1;let t=((px-a[0])*dx+(py-a[1])*dy)/L;if(t<-.06||t>1.06)return 1e9;t=Math.max(0,Math.min(1,t));return Math.hypot(px-a[0]-t*dx,py-a[1]-t*dy)}
+function linePalms(){const out=[],st=numStart();
+ S.L.forEach((l,i)=>{if(l.k==='row'){rowPos(l).forEach((p,j)=>out.push({x:p[0],z:p[1],l,num:j+1,j:j+1,side:j<l.n/2?'يسار':'يمين',i:i+1}));return}const a=l.pts[0],b=l.pts[l.pts.length-1],o=ori(l),v=o==='v',lo=v?Math.min(a[1],b[1]):Math.min(a[0],b[0]),hi=v?Math.max(a[1],b[1]):Math.max(a[0],b[0]),L=hi-lo,sd=l.side;
+  for(let g=0;g<(l.one?1:2);g++)for(let j=0;j<sd;j++){if(l.pp){const q=l.pp[g*sd+j];out.push({x:q[0],z:q[1],l,num:st[l.id]+1+g*sd+j,j:j+1,side:SIDEN[o][g],i:i+1});continue}const t=(l.ys&&v)?l.ys[j]:lo+(j+.5)*L/sd,ff=l.off||5,off=v?(g?-ff:ff):(g?ff:-ff);
+   out.push({x:v?(a[0]+b[0])/2+off:t,z:v?t:(a[1]+b[1])/2+off,l,num:st[l.id]+1+g*sd+j,j:j+1,side:SIDEN[o][g],i:i+1})}
+  });return out}
+function crownGeo(){const pos=[],idx=[],N=8;
+ for(let i=0;i<N;i++){const a=i/N*Math.PI*2+(i%2)*.2,ca=Math.cos(a),sa=Math.sin(a),base=pos.length/3;
+  for(let k=0;k<=3;k++){const t=k/3,r=4.4*t,y=1.3*t-1.9*t*t,w=.7*(1-.75*t)+.05;pos.push(ca*r-sa*w,y,sa*r+ca*w,ca*r+sa*w,y,sa*r-ca*w)}
+  for(let k=0;k<3;k++){const o=base+k*2;idx.push(o,o+1,o+2,o+1,o+3,o+2)}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();return g}
+function lab(txt,bg,w,h){const c=document.createElement('canvas');c.width=128;c.height=64;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(4,6,120,52);x.fillStyle='#fff';x.font='bold 34px Tahoma';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,64,33);
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));s.scale.set(w,h,1);s.renderOrder=10;return s}
+function clearG(g){for(let i=g.children.length-1;i>=0;i--){const o=g.children[i];g.remove(o);o.traverse(q=>{if(q.geometry&&!q.geometry.userData.shared)q.geometry.dispose();if(q.material&&!q.material.userData.shared){q.material.map&&q.material.map.dispose();q.material.dispose()}if(q.isInstancedMesh)q.dispose()})}}
+function palmSet(pts,colFn){const n=pts.length,tr=new THREE.InstancedMesh(T3.trg,T3.trm,n),cr=new THREE.InstancedMesh(T3.crg,T3.crm,n);
+ const m=new THREE.Matrix4(),q=new THREE.Quaternion(),p=new THREE.Vector3(),s=new THREE.Vector3(),e=new THREE.Euler();
+ pts.forEach((o,i)=>{const k=o.s||1;e.set(0,Math.random()*6.28,0);q.setFromEuler(e);s.set(k,k,k);p.set(o.x,0,o.z);m.compose(p,q,s);tr.setMatrixAt(i,m);p.set(o.x,5*k,o.z);m.compose(p,q,s);cr.setMatrixAt(i,m);cr.setColorAt(i,colFn(o,i))});
+ return{tr,cr}}
+function box(g,x,z,w,d,h,col){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:col}));m.position.set(x+w/2,h/2,z+d/2);g.add(m);return m}
+function road(g,a,b,w,col){const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz),m=new THREE.Mesh(new THREE.BoxGeometry(L,.3,w),new THREE.MeshLambertMaterial({color:col}));m.position.set((a[0]+b[0])/2,.2,(a[1]+b[1])/2);m.rotation.y=-Math.atan2(dz,dx);g.add(m)}
+function init3(){
+ if(T3)return true;if(typeof THREE==='undefined')return false;
+ const cv=$('#cv'),r=new THREE.WebGLRenderer({canvas:cv,antialias:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));
+ const sc=new THREE.Scene();sc.background=new THREE.Color(0xbcd8ee);
+ const cam=new THREE.PerspectiveCamera(45,1,1,6000);
+ sc.add(new THREE.HemisphereLight(0xffffff,0x9b8a68,.95));const dl=new THREE.DirectionalLight(0xfff2d8,.8);dl.position.set(-300,500,300);sc.add(dl);
+ T3={r,sc,cam,th:.2,el:.85,rad:1050,tgt:new THREE.Vector3(300,0,730),dirty:true,base:new THREE.Group(),lines:new THREE.Group(),sel:null,pick:[],list:[],cr:null};
+ const tg=new THREE.CylinderGeometry(.5,.8,5,6);tg.translate(0,2.5,0);tg.userData.shared=true;T3.trg=tg;T3.crg=crownGeo();T3.crg.userData.shared=true;
+ T3.trm=new THREE.MeshLambertMaterial({color:0x7a5230});T3.trm.userData.shared=true;T3.crm=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide});T3.crm.userData.shared=true;
+ sc.add(T3.base,T3.lines);
+ const P=new Map();let mv=0,pd=0;const d2=()=>{const a=[...P.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])||1};
+ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);mv=0;pd=P.size===2?d2():0});
+ cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];
+  if(P.size===1){T3.th-=dx*.006;T3.el=Math.max(.12,Math.min(1.5,T3.el+dy*.006));mv+=Math.abs(dx)+Math.abs(dy)}
+  else{P.set(e.pointerId,[e.clientX,e.clientY]);const d=d2();if(pd)T3.rad=Math.max(40,Math.min(2400,T3.rad*pd/d));pd=d;const s=T3.rad*.0012;
+   T3.tgt.x-=Math.cos(T3.th)*dx/2*s+(-Math.sin(T3.th))*(-dy/2)*s;T3.tgt.z-=(-Math.sin(T3.th))*dx/2*s+(-Math.cos(T3.th))*(-dy/2)*s;mv+=10}
+  P.set(e.pointerId,[e.clientX,e.clientY]);cam3()});
+ const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);pd=0;if(P.size===0&&mv<8&&e.type==='pointerup')pick3(e)};
+ cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ cv.addEventListener('wheel',e=>{e.preventDefault();T3.rad=Math.max(40,Math.min(2400,T3.rad*Math.exp(e.deltaY*.001)));cam3()},{passive:false});
+ addEventListener('resize',()=>{if(vw==='d')size3()});
+ (function loop(){requestAnimationFrame(loop);if(vw==='d'&&T3.dirty){T3.dirty=false;T3.r.render(T3.sc,T3.cam)}})();
+ return true}
+function cam3(){const t=T3;t.cam.position.set(t.tgt.x+t.rad*Math.cos(t.el)*Math.sin(t.th),t.rad*Math.sin(t.el),t.tgt.z+t.rad*Math.cos(t.el)*Math.cos(t.th));t.cam.lookAt(t.tgt);t.dirty=true}
+function size3(){const w=$('#w3').clientWidth||360,h=Math.round(Math.min(innerHeight*.7,w*1.3));T3.r.setSize(w,h,false);const cv=$('#cv');cv.style.width=w+'px';cv.style.height=h+'px';T3.cam.aspect=w/h;T3.cam.updateProjectionMatrix();cam3()}
+function buildBase3(){
+ const g=T3.base;clearG(g);
+ const gr=new THREE.Mesh(new THREE.PlaneGeometry(1600,2400),new THREE.MeshLambertMaterial({color:0xd9c79b}));gr.rotation.x=-Math.PI/2;gr.position.set(410,0,730);g.add(gr);
+ FARM.forEach(poly=>{const ge=new THREE.ShapeGeometry(new THREE.Shape(poly.map(p=>new THREE.Vector2(p[0],p[1]))));ge.rotateX(Math.PI/2);const m=new THREE.Mesh(ge,new THREE.MeshLambertMaterial({color:0xcdb583,side:THREE.DoubleSide}));m.position.y=.1;g.add(m)});
+ ROAD.forEach((p,i)=>{if(i)road(g,ROAD[i-1],p,12,0x77777c)});road(g,TRACK[0],TRACK[1],5,0xb5aa90);
+ BLD.forEach(b=>box(g,b[0],b[1],b[2],b[3],7,0xf4f1ea));
+ const cor=[];S.L.forEach(l=>{for(let i=1;i<l.pts.length;i++)cor.push([l.pts[i-1],l.pts[i],(l.off||5)+3.5])});
+ const pts=[];
+ const ps=pts.length?palmSet(pts,(o,i)=>new THREE.Color().setHSL(.3+(Math.random()-.5)*.03,.45,.28+Math.random()*.1)):null;if(ps)g.add(ps.tr,ps.cr);T3.dirty=true}
+function buildLines3(){
+ const g=T3.lines;clearG(g);T3.pick=[];
+ const lp=linePalms();T3.list=lp;
+ if(lp.length){const st3=numStart(),ps=palmSet(lp,o=>new THREE.Color(colorMode==='q'?(QCOL[(PD[o.l.id+':'+(o.num-st3[o.l.id])]||{}).q]||0xa9a98a):(o.l.open?0x2fc24f:0x9c9a62)));g.add(ps.tr,ps.cr);T3.cr=ps.cr}else T3.cr=null;
+ if(GP.length){const gs=palmSet(GP.map(q=>({x:q.x,z:q.y,q})),o=>new THREE.Color(T3.gsel===o.q?0xffd23f:colorMode==='q'?(QCOL[(PD['q'+o.q.pl.n+':'+o.q.num]||{}).q]||0xa9a98a):0x3f9a4a));g.add(gs.tr,gs.cr);T3.gcr=gs.cr}else T3.gcr=null;
+ S.L.forEach((l,i)=>{
+  for(let k=1;k<l.pts.length;k++){const a=l.pts[k-1],b=l.pts[k],dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz)||1;
+   const cy=new THREE.CylinderGeometry(l.open?.8:.5,l.open?.8:.5,L,8);cy.rotateZ(Math.PI/2);
+   const m=new THREE.Mesh(cy,new THREE.MeshLambertMaterial({color:l.open?0x1f8fe0:0xd64545,emissive:l.open?0x0a3a66:0x500000}));m.position.set((a[0]+b[0])/2,1,(a[1]+b[1])/2);m.rotation.y=-Math.atan2(dz,dx);g.add(m)}
+  const v=new THREE.Mesh(new THREE.CylinderGeometry(2.6,2.6,3.6,14),new THREE.MeshLambertMaterial({color:l.open?0x2f9e5b:0xd64545}));v.position.set(l.vx,2,l.vy);v.userData.lid=l.id;g.add(v);T3.pick.push(v);
+  const s=lab(vlab(l,i),l.open?'#2f9e5b':'#d64545',15,7.5);s.position.set(l.vx,10,l.vy);s.userData.lid=l.id;g.add(s);T3.pick.push(s)});
+ S.T.forEach(t=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(6,6,9,22),new THREE.MeshLambertMaterial({color:0x1aa6b7}));m.position.set(t.x,4.5,t.y);g.add(m);const s=lab(t.name,'#127986',22,11);s.position.set(t.x,16,t.y);g.add(s)});
+ if(T3.sel)lp.filter(o=>o.l.id===T3.sel).forEach(o=>{const s=lab(String(o.num),'#222',9,4.5);s.position.set(o.x,11.5,o.z);g.add(s)});
+ T3.dirty=true}
+function pick3(e){
+ const t=T3,rc=new THREE.Raycaster(),b=$('#cv').getBoundingClientRect();
+ rc.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height*2-1)),t.cam);
+ const a=rc.intersectObjects(t.pick,false)[0],c=t.cr?rc.intersectObject(t.cr,false)[0]:null,gc=t.gcr?rc.intersectObject(t.gcr,false)[0]:null;
+ if(a&&(!c||a.distance<=c.distance+30)){const l=S.L.find(x=>x.id===a.object.userData.lid);if(l){t.sel=l.id;l.open=!l.open;save();render();panel();info3(l,null)}return}
+ if(gc&&gc.instanceId!=null&&(!c||gc.distance<c.distance)){const o=GP[gc.instanceId];t.gsel=o;t.sel=null;buildLines3();const el=$('#pinfo3');el.innerHTML=gpEd(o);bindPalmEd(el,gpl(o.pl),o.num);return}
+ t.gsel=null;
+ if(c&&c.instanceId!=null){const o=t.list[c.instanceId];t.sel=o.l.id;buildLines3();info3(o.l,o);return}
+ t.sel=null;buildLines3();$('#pinfo3').innerHTML='<p class="mut">اضغط على محبس لفتحه أو قفله، أو على نخلة لمعرفة رقمها.</p>'}
+function info3(l,o){const i=S.L.indexOf(l)+1;
+ if(o){const el=$('#pinfo3');el.innerHTML=palmEd(l,o.num,o.side,o.j);bindPalmEd(el,l,o.num);return}
+ $('#pinfo3').innerHTML=(o?`<b>نخلة رقم ${o.num}</b><p class="mut" style="margin-top:4px">${l.plot?pnm(l.plot)+' · ':''}${esc(l.name)} · المحبس ${vlab(l,i-1)} · جهة ${o.side} · النخلة ${o.j} من ${l.k==='row'?l.n:l.side} · `:`<b>${l.plot?pnm(l.plot)+' · ':''}${esc(l.name)} · المحبس ${vlab(l,i-1)}</b><p class="mut" style="margin-top:4px">${cnt(l)} نخلة · `)+(l.open?'مفتوح، النخيل يُسقى الحين':'مقفل')+'</p>'}
+function view(v){vw=v;
+ $('#dv').style.display=v==='d'?'':'none';$('#mapv').style.display=v==='m'?'':'none';$('#schv').style.display=v==='s'?'':'none';
+ ['d','m','s'].forEach((k,i)=>$('#v'+i).classList.toggle('on',k===v));
+ if(v==='s')drawSch();
+ else if(v==='m'){if(!$('#pdots'))buildBase();render()}
+ else{if(!init3()){$('#pinfo3').innerHTML='<p class="mut">تعذر تحميل مكتبة 3D. تأكد من الاتصال بالإنترنت.</p>';return}buildBase3();buildLines3();size3()}}
+
+$('#cm').onclick=()=>{colorMode=colorMode==='s'?'q':'s';$('#cm').textContent=colorMode==='q'?'🎨 التلوين: حسب الإنتاج (أخضر جيد · أصفر متوسط · أحمر ضعيف · رمادي غير محدد)':'🎨 تلوين النخيل: حسب الحالة';if(T3)buildLines3()};
+/* ===== مزامنة Firebase ===== */
+function stateOut(){return{L:Object.fromEntries(S.L.map(l=>[l.id,{open:l.open,name:l.name,side:l.side,n:l.n}])),T:S.T}}
+function cloudPush(){if(window.FB)window.FB.push('state',stateOut())}
+window.cloudOut=n=>n==='state'?stateOut():PD;
+window.setCloud=s=>{const e=$('#cloud');if(!e)return;e.textContent=s==='ok'?'☁️ متزامن':s==='sync'?'☁️ جاري المزامنة…':s==='err'?'⚠️ بدون اتصال (محفوظ على الجهاز)':'☁️ …'};
+window.onCloudState=d=>{if(!d)return;S.L.forEach(l=>{const m=d.L&&d.L[l.id];if(!m)return;if(m.open!==undefined)l.open=m.open;if(m.name!==undefined&&!/\(تحت\)$/.test(m.name))l.name=m.name;if(m.side!==undefined&&!l.pp&&l.k!=='col')l.side=m.side;if(m.n!==undefined)l.n=m.n});if(d.T&&d.T.length)S.T=d.T;try{localStorage.setItem('irr23',JSON.stringify(S))}catch(e){}render();panel()};
+window.onCloudPalms=d=>{PD=d||{};try{localStorage.setItem('irrPalm',JSON.stringify(PD))}catch(e){}sum();if(vw==='d'&&T3&&colorMode==='q')buildLines3()};
+let LOCK=true;try{LOCK=localStorage.getItem('irrLock')!=='0'}catch(e){}
+function lockUI(){const b=$('#lk');b.textContent=LOCK?'🔒 الخطوط مثبتة':'🔓 التحريك مفتوح';b.classList.toggle('on',LOCK)}
+$('#lk').onclick=()=>{LOCK=!LOCK;try{localStorage.setItem('irrLock',LOCK?'1':'0')}catch(e){}lockUI();if(LOCK&&tool!=='sel')setTool('sel');drag=null;panel();$('#hint').textContent=LOCK?'مثبتة: اضغط على المحبس لفتحه أو قفله فقط.':HINT[tool]};
+lockUI();
+setTool('sel');panel();view('d');
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getAnalytics,isSupported} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+const firebaseConfig={
+  apiKey:"AIzaSyBWcomQ1ZiVh7_ag_RMLY1h3l-Z1fv7abU",
+  authDomain:"farm-5b576.firebaseapp.com",
+  projectId:"farm-5b576",
+  storageBucket:"farm-5b576.firebasestorage.app",
+  messagingSenderId:"724050437617",
+  appId:"1:724050437617:web:ed9da41109da781583d050",
+  measurementId:"G-XMTLQDVT9L"
+};
+try{
+  const app=initializeApp(firebaseConfig);
+  try{isSupported().then(ok=>{if(ok)getAnalytics(app)}).catch(()=>{})}catch(e){}
+  const db=getFirestore(app);
+  const refs={state:doc(db,'irrigation','state'),palms:doc(db,'irrigation','palms')};
+  const timers={};
+  window.FB={push(name,data){
+    clearTimeout(timers[name]);window.setCloud&&window.setCloud('sync');
+    timers[name]=setTimeout(()=>{setDoc(refs[name],{data:JSON.stringify(data),t:Date.now()})
+      .then(()=>window.setCloud&&window.setCloud('ok'))
+      .catch(e=>{console.error('Firestore write',e);window.setCloud&&window.setCloud('err')})},600);
+  }};
+  const listen=(name,apply)=>onSnapshot(refs[name],snap=>{
+    if(snap.metadata.hasPendingWrites)return;
+    if(snap.exists()){try{apply(JSON.parse(snap.data().data))}catch(e){console.error(e)}}
+    else if(window.cloudOut){window.FB.push(name,window.cloudOut(name))}
+    window.setCloud&&window.setCloud('ok');
+  },err=>{console.error('Firestore read',err);window.setCloud&&window.setCloud('err')});
+  listen('state',d=>window.onCloudState&&window.onCloudState(d));
+  listen('palms',d=>window.onCloudPalms&&window.onCloudPalms(d));
+}catch(e){console.error('Firebase init',e);window.setCloud&&window.setCloud('err')}
+</script>
+</body>
+</html>
